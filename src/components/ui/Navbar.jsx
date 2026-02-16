@@ -46,7 +46,7 @@ export default function Navbar() {
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-accent focus:text-primary-dark focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold">
         Skip to content
       </a>
-      <nav aria-label="Main navigation" className="bg-primary-dark/70 backdrop-blur-md border-b border-accent/20">
+      <nav aria-label="Main navigation" className={`${menuOpen ? 'bg-primary-dark' : 'bg-primary-dark/70'} backdrop-blur-md border-b border-accent/20`}>
         <div className="max-w-7xl mx-auto px-5 md:px-12 flex items-center justify-between h-16">
           {/* Brand */}
           <button
