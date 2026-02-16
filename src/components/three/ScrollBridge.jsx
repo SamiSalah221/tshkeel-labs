@@ -47,10 +47,13 @@ export default function ScrollBridge({ setScrollToSection, setActiveSection }) {
       //   targetScrollTop = sectionOffsetTop / ratio
       // No navbar subtraction needed — sections have their own top padding.
       const ratio = (maxScroll - clientHeight) / maxScroll;
-      const targetScrollTop = Math.min(
-        maxScroll,
-        Math.max(0, sectionEl.offsetTop / ratio)
-      );
+      let targetScrollTop;
+      if (ratio <= 0 || !isFinite(ratio)) {
+        targetScrollTop = Math.min(maxScroll, Math.max(0, sectionEl.offsetTop));
+      } else {
+        targetScrollTop = Math.min(maxScroll, Math.max(0, sectionEl.offsetTop / ratio));
+      }
+      if (!isFinite(targetScrollTop)) return;
 
       gsap.to(scrollContainer, {
         scrollTop: targetScrollTop,
@@ -87,7 +90,10 @@ export default function ScrollBridge({ setScrollToSection, setActiveSection }) {
         const el = container.querySelector(`[data-section="${name}"]`);
         if (!el) continue;
         // Normalized scroll position (0-1) where this section starts
-        const normalizedOffset = (el.offsetTop / ratio) / maxScroll;
+        const normalizedOffset = (ratio <= 0 || !isFinite(ratio))
+          ? el.offsetTop / maxScroll
+          : (el.offsetTop / ratio) / maxScroll;
+        if (!isFinite(normalizedOffset)) continue;
         offsets.push({ name, offset: normalizedOffset });
       }
       cachedOffsets.current = offsets;

@@ -1,4 +1,4 @@
-import { Suspense, useState, useEffect, useCallback, useRef, useContext, lazy } from "react";
+import { Suspense, useState, useEffect, useCallback, useRef, useContext, useMemo, lazy } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ScrollControls, Scroll } from "@react-three/drei";
 import { siteConfig } from "./config/siteConfig";
@@ -44,6 +44,22 @@ function AppContent() {
   const [contentEl, setContentEl] = useState(null);
   const suppressMeasureRef = useRef(false);
   const transitionTimerRef = useRef(null);
+
+  // Mobile two-view toggle
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches
+  );
+  const [mobileView, setMobileView] = useState("home"); // "home" | "products"
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const handler = (e) => {
+      setIsMobile(e.matches);
+      if (!e.matches) setMobileView("home"); // reset to home when switching to desktop
+    };
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   useEffect(() => { scrollToSectionRef.current = scrollToSection; }, [scrollToSection]);
 
@@ -118,7 +134,7 @@ function AppContent() {
   // }, [setActiveCategory]);
 
   return (
-    <ScrollContext.Provider value={{ scrollToSection, activeSection }}>
+    <ScrollContext.Provider value={{ scrollToSection, activeSection, isMobile, mobileView, setMobileView }}>
       <div className="w-full h-full bg-bg">
         <Navbar />
 
@@ -140,21 +156,50 @@ function AppContent() {
                     className={theme.bgPatternClass}
                     style={{ height: '100%', position: 'absolute' }}
                   />
-                  {theme.showSeasonalBanner && <SeasonalBanner />}
-                  <HeroSection config={siteConfig} />
-                  <AboutSection config={siteConfig} />
-                  <HowItWorks />
-                  <ProductShowcase
-                    onViewIn3D={setViewerProduct}
-                    // activeCategory={activeCategory}
-                    // setActiveCategory={handleCategoryChange}
-                    // themeLabel={theme.label}
-                  />
-                  <TestimonialsSection />
-                  <CustomOrderCTA />
-                  <FAQSection />
-                  <ContactSection config={siteConfig} />
-                  <Footer />
+                  {/* Desktop: render all sections. Mobile: conditional on mobileView */}
+                  {(!isMobile || mobileView === "home") && (
+                    <>
+                      {theme.showSeasonalBanner && <SeasonalBanner />}
+                      <HeroSection config={siteConfig} />
+                      <AboutSection config={siteConfig} />
+                      <HowItWorks />
+                    </>
+                  )}
+                  {(!isMobile || mobileView === "products") && (
+                    <>
+                      {isMobile && (
+                        <div
+                          data-section="products"
+                          className="flex items-center gap-3 px-5 pt-20 pb-4"
+                          style={{ pointerEvents: "auto" }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setMobileView("home")}
+                            className="text-accent font-semibold text-sm flex items-center gap-1 cursor-pointer min-h-[44px]"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Back
+                          </button>
+                          <h2 className="text-2xl font-bold text-accent">Our Products</h2>
+                        </div>
+                      )}
+                      <ProductShowcase
+                        onViewIn3D={setViewerProduct}
+                      />
+                    </>
+                  )}
+                  {(!isMobile || mobileView === "home") && (
+                    <>
+                      <TestimonialsSection />
+                      <CustomOrderCTA />
+                      <FAQSection />
+                      <ContactSection config={siteConfig} />
+                      <Footer />
+                    </>
+                  )}
                 </main>
               </Scroll>
             </ScrollControls>

@@ -3,7 +3,15 @@ import { motion } from "framer-motion";
 import { ScrollContext } from "../../contexts/ScrollContext";
 
 export default function HeroSection({ config }) {
-  const { scrollToSection } = useContext(ScrollContext);
+  const { scrollToSection, isMobile, setMobileView } = useContext(ScrollContext);
+
+  const handleBrowseProducts = () => {
+    if (isMobile) {
+      setMobileView("products");
+    } else {
+      scrollToSection("products");
+    }
+  };
 
   return (
     <section
@@ -38,7 +46,7 @@ export default function HeroSection({ config }) {
         <div className="flex flex-col items-center gap-3 mt-6">
           <button
             type="button"
-            onClick={() => scrollToSection("products")}
+            onClick={handleBrowseProducts}
             className="btn btn-md btn-primary"
           >
             Browse Products

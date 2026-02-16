@@ -11,8 +11,26 @@ const NAV_LINKS = [
 ];
 
 export default function Navbar() {
-  const { scrollToSection, activeSection } = useContext(ScrollContext);
+  const { scrollToSection, activeSection, isMobile, mobileView, setMobileView } = useContext(ScrollContext);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleNavClick = (section) => {
+    if (isMobile) {
+      if (section === "products") {
+        setMobileView("products");
+      } else {
+        // Switch to home view first, then scroll after a tick so sections are rendered
+        if (mobileView !== "home") {
+          setMobileView("home");
+          setTimeout(() => scrollToSection(section), 100);
+        } else {
+          scrollToSection(section);
+        }
+      }
+    } else {
+      scrollToSection(section);
+    }
+  };
 
   useEffect(() => {
     if (menuOpen) {
@@ -33,7 +51,7 @@ export default function Navbar() {
           {/* Brand */}
           <button
             type="button"
-            onClick={() => scrollToSection("hero")}
+            onClick={() => handleNavClick("hero")}
             className="text-accent font-bold text-xl tracking-wide cursor-pointer"
             style={{ fontFamily: "'Saltza', 'Inter', system-ui, sans-serif", letterSpacing: "0.05em" }}
           >
@@ -51,7 +69,7 @@ export default function Navbar() {
               <button
                 type="button"
                 key={link.section}
-                onClick={() => scrollToSection(link.section)}
+                onClick={() => handleNavClick(link.section)}
                 className={`text-sm uppercase tracking-widest cursor-pointer transition-colors pb-1 ${
                   activeSection === link.section
                     ? "text-accent border-b-2 border-accent"
@@ -83,7 +101,7 @@ export default function Navbar() {
         {/* Mobile Menu — backdrop + slide-in drawer */}
         {menuOpen && (
           <div
-            className="md:hidden fixed inset-0 top-16 z-30"
+            className="md:hidden fixed inset-0 top-16 z-50"
             onClick={() => setMenuOpen(false)}
           >
             {/* Backdrop */}
@@ -107,11 +125,11 @@ export default function Navbar() {
                   type="button"
                   key={link.section}
                   onClick={() => {
-                    scrollToSection(link.section);
+                    handleNavClick(link.section);
                     setMenuOpen(false);
                   }}
                   className={`block w-full text-left text-sm uppercase tracking-widest py-3 min-h-[44px] cursor-pointer transition-colors ${
-                    activeSection === link.section
+                    (link.section === "products" ? mobileView === "products" : activeSection === link.section)
                       ? "text-accent border-l-2 border-accent pl-3"
                       : "text-text-on-dark/80 hover:text-accent"
                   }`}
