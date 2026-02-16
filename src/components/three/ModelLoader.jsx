@@ -299,36 +299,7 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
     if (onZonesDetected) onZonesDetected(zones);
   }, [zones, onZonesDetected]);
 
-  // Clone scene and apply per-zone color overrides
-  const coloredScene = useMemo(() => {
-    const clone = scene.clone(true);
-    if (zoneColors && Object.keys(zoneColors).length > 0) {
-      // Build a lookup from any member hex to the override color
-      const hexToOverride = {};
-      for (const zone of zones) {
-        if (zoneColors[zone.hex]) {
-          for (const memberHex of zone.memberHexes) {
-            hexToOverride[memberHex] = zoneColors[zone.hex];
-          }
-        }
-      }
-
-      if (Object.keys(hexToOverride).length > 0) {
-        clone.traverse((child) => {
-          if (child.isMesh && child.material && child.material.color) {
-            const originalHex = "#" + child.material.color.getHexString();
-            if (hexToOverride[originalHex]) {
-              child.material = child.material.clone();
-              child.material.color = new THREE.Color(hexToOverride[originalHex]);
-            }
-          }
-        });
-      }
-    }
-    return clone;
-  }, [scene, zoneColors, zones]);
-
-  // Build lookup: original mesh hex → zone hex key (for highlight matching)
+  // Build lookup: original mesh hex → zone hex key
   const origHexToZoneHex = useMemo(() => {
     const map = {};
     for (const zone of zones) {
@@ -339,33 +310,61 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
     return map;
   }, [zones]);
 
+  // Map from cloned mesh UUID → zone hex key (stable across color overrides)
+  const meshZoneMapRef = useRef({});
+
+  // Clone scene, clone ALL materials (so emissive changes don't bleed), and apply overrides
+  const coloredScene = useMemo(() => {
+    const clone = scene.clone(true);
+    const meshZoneMap = {};
+
+    // Build override lookup
+    const hexToOverride = {};
+    if (zoneColors && Object.keys(zoneColors).length > 0) {
+      for (const zone of zones) {
+        if (zoneColors[zone.hex]) {
+          for (const memberHex of zone.memberHexes) {
+            hexToOverride[memberHex] = zoneColors[zone.hex];
+          }
+        }
+      }
+    }
+
+    // Clone every mesh material and record zone membership by UUID
+    clone.traverse((child) => {
+      if (!child.isMesh || !child.material || !child.material.color) return;
+      const originalHex = "#" + child.material.color.getHexString();
+      // Always clone material so each mesh has its own instance
+      child.material = child.material.clone();
+      // Record which zone this mesh belongs to (by original color)
+      const zoneHex = origHexToZoneHex[originalHex];
+      if (zoneHex) {
+        meshZoneMap[child.uuid] = zoneHex;
+      }
+      // Apply color override if needed
+      if (hexToOverride[originalHex]) {
+        child.material.color = new THREE.Color(hexToOverride[originalHex]);
+      }
+    });
+
+    meshZoneMapRef.current = meshZoneMap;
+    return clone;
+  }, [scene, zoneColors, zones, origHexToZoneHex]);
+
   // Animate emissive glow on meshes belonging to the active zone
   useFrame(({ clock }) => {
     if (!coloredScene) return;
     const pulse = activeZone ? 0.3 + 0.3 * Math.sin(clock.elapsedTime * 2) : 0;
+    const zoneMap = meshZoneMapRef.current;
 
     coloredScene.traverse((child) => {
       if (!child.isMesh || !child.material) return;
-      // Determine which zone this mesh belongs to by checking original colors
-      // When colors are overridden, the hex changes, so we need to check both
-      const currentHex = "#" + child.material.color.getHexString();
-      // Try to find zone via current color or via any known mapping
-      let meshZoneHex = origHexToZoneHex[currentHex];
-      // If color was overridden, the currentHex won't be in origHexToZoneHex.
-      // Check if currentHex is an override value for any zone.
-      if (!meshZoneHex && zoneColors) {
-        for (const [zoneHex, overrideHex] of Object.entries(zoneColors)) {
-          if (overrideHex === currentHex) {
-            meshZoneHex = zoneHex;
-            break;
-          }
-        }
-      }
+      const meshZoneHex = zoneMap[child.uuid];
 
       if (activeZone && meshZoneHex === activeZone) {
         child.material.emissive = emissiveColor.current;
         child.material.emissiveIntensity = pulse;
-      } else {
+      } else if (child.material.emissiveIntensity !== 0) {
         child.material.emissiveIntensity = 0;
       }
     });
