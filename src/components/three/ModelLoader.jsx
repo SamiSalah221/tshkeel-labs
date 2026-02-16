@@ -204,7 +204,7 @@ function PlaceholderGeometry({ type, color, colorOverride }) {
 
 function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, activeZone }) {
   const { scene } = useGLTF(path);
-  const emissiveColor = useRef(new THREE.Color("#C9A84C"));
+  const whiteColor = useRef(new THREE.Color(1, 1, 1));
 
   // Detect color zones from the original scene, using zoneConfig when available
   const zones = useMemo(() => {
@@ -310,13 +310,13 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
     return map;
   }, [zones]);
 
-  // Map from cloned mesh UUID → zone hex key (stable across color overrides)
-  const meshZoneMapRef = useRef({});
+  // Per-mesh data: zone membership + base color (for highlight animation)
+  const meshDataRef = useRef({});
 
-  // Clone scene, clone ALL materials (so emissive changes don't bleed), and apply overrides
+  // Clone scene, clone ALL materials, apply overrides, and record base colors
   const coloredScene = useMemo(() => {
     const clone = scene.clone(true);
-    const meshZoneMap = {};
+    const meshData = {};
 
     // Build override lookup
     const hexToOverride = {};
@@ -330,42 +330,47 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
       }
     }
 
-    // Clone every mesh material and record zone membership by UUID
+    // Clone every mesh material, apply overrides, and record base color
     clone.traverse((child) => {
       if (!child.isMesh || !child.material || !child.material.color) return;
       const originalHex = "#" + child.material.color.getHexString();
       // Always clone material so each mesh has its own instance
       child.material = child.material.clone();
-      // Record which zone this mesh belongs to (by original color)
-      const zoneHex = origHexToZoneHex[originalHex];
-      if (zoneHex) {
-        meshZoneMap[child.uuid] = zoneHex;
-      }
       // Apply color override if needed
       if (hexToOverride[originalHex]) {
         child.material.color = new THREE.Color(hexToOverride[originalHex]);
       }
+      // Record zone membership and base color (after override)
+      const zoneHex = origHexToZoneHex[originalHex];
+      if (zoneHex) {
+        meshData[child.uuid] = {
+          zoneHex,
+          baseColor: child.material.color.clone(),
+        };
+      }
     });
 
-    meshZoneMapRef.current = meshZoneMap;
+    meshDataRef.current = meshData;
     return clone;
   }, [scene, zoneColors, zones, origHexToZoneHex]);
 
-  // Animate emissive glow on meshes belonging to the active zone
+  // Animate: brighten active zone meshes toward white in a slow 1s pulse
   useFrame(({ clock }) => {
-    if (!coloredScene) return;
-    const pulse = activeZone ? 0.3 + 0.3 * Math.sin(clock.elapsedTime * 2) : 0;
-    const zoneMap = meshZoneMapRef.current;
+    if (!coloredScene || !activeZone) return;
+    // Sine wave 0→1→0 over 1 second
+    const t = (Math.sin(clock.elapsedTime * Math.PI * 2) + 1) / 2;
+    const brightenFactor = t * 0.35; // up to 35% toward white
+    const data = meshDataRef.current;
 
     coloredScene.traverse((child) => {
       if (!child.isMesh || !child.material) return;
-      const meshZoneHex = zoneMap[child.uuid];
-
-      if (activeZone && meshZoneHex === activeZone) {
-        child.material.emissive = emissiveColor.current;
-        child.material.emissiveIntensity = pulse;
-      } else if (child.material.emissiveIntensity !== 0) {
-        child.material.emissiveIntensity = 0;
+      const info = data[child.uuid];
+      if (!info) return;
+      if (info.zoneHex === activeZone) {
+        child.material.color.copy(info.baseColor).lerp(whiteColor.current, brightenFactor);
+      } else {
+        // Ensure non-active meshes stay at base color
+        child.material.color.copy(info.baseColor);
       }
     });
   });
