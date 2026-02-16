@@ -205,9 +205,10 @@ function PlaceholderGeometry({ type, color, colorOverride }) {
 function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, activeZone }) {
   const { scene } = useGLTF(path);
   const whiteColor = useRef(new THREE.Color(1, 1, 1));
+  const needsResetRef = useRef(false);
 
-  // Detect color zones from the original scene, using zoneConfig when available
-  const zones = useMemo(() => {
+  // Detect ALL zones from the original scene (including non-editable)
+  const allZonesWithMembers = useMemo(() => {
     if (zoneConfig === "none") return [];
 
     // Collect all mesh colors
@@ -225,7 +226,6 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
     });
 
     if (zoneConfig === "single") {
-      // All meshes become one zone
       const allHexes = [...new Set(meshColors.map((m) => m.hex))];
       if (allHexes.length === 0) return [];
       return [{
@@ -238,7 +238,6 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
     }
 
     if (Array.isArray(zoneConfig)) {
-      // Custom zones — assign each mesh to nearest configured zone
       const configuredZones = zoneConfig.map((z) => ({
         name: z.name,
         editable: z.editable,
@@ -268,11 +267,11 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
         }
       }
 
-      // Only return editable zones to the UI
-      return configuredZones.filter((z) => z.editable && z.count > 0);
+      // Return ALL zones with meshes (including non-editable) for complete mapping
+      return configuredZones.filter((z) => z.count > 0);
     }
 
-    // Fallback: auto-detect with merging (existing behavior for products without zoneConfig)
+    // Fallback: auto-detect with merging
     const zoneList = [];
     const threshold = 40;
     for (const mc of meshColors) {
@@ -294,21 +293,26 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
     return zoneList;
   }, [scene, zoneConfig]);
 
-  // Report zones to parent (ProductViewerModal)
-  useEffect(() => {
-    if (onZonesDetected) onZonesDetected(zones);
-  }, [zones, onZonesDetected]);
+  // Editable zones only — reported to UI for zone swatches
+  const editableZones = useMemo(() => {
+    return allZonesWithMembers.filter((z) => z.editable !== false);
+  }, [allZonesWithMembers]);
 
-  // Build lookup: original mesh hex → zone hex key
+  // Report editable zones to parent (ProductViewerModal)
+  useEffect(() => {
+    if (onZonesDetected) onZonesDetected(editableZones);
+  }, [editableZones, onZonesDetected]);
+
+  // Build lookup from ALL zones (original mesh hex → zone hex key)
   const origHexToZoneHex = useMemo(() => {
     const map = {};
-    for (const zone of zones) {
+    for (const zone of allZonesWithMembers) {
       for (const mh of zone.memberHexes) {
         map[mh] = zone.hex;
       }
     }
     return map;
-  }, [zones]);
+  }, [allZonesWithMembers]);
 
   // Per-mesh data: zone membership + base color (for highlight animation)
   const meshDataRef = useRef({});
@@ -318,10 +322,10 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
     const clone = scene.clone(true);
     const meshData = {};
 
-    // Build override lookup
+    // Build override lookup from ALL zones
     const hexToOverride = {};
     if (zoneColors && Object.keys(zoneColors).length > 0) {
-      for (const zone of zones) {
+      for (const zone of allZonesWithMembers) {
         if (zoneColors[zone.hex]) {
           for (const memberHex of zone.memberHexes) {
             hexToOverride[memberHex] = zoneColors[zone.hex];
@@ -340,27 +344,39 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
       if (hexToOverride[originalHex]) {
         child.material.color = new THREE.Color(hexToOverride[originalHex]);
       }
-      // Record zone membership and base color (after override)
-      const zoneHex = origHexToZoneHex[originalHex];
-      if (zoneHex) {
-        meshData[child.uuid] = {
-          zoneHex,
-          baseColor: child.material.color.clone(),
-        };
-      }
+      // Record zone membership and base color for ALL meshes
+      meshData[child.uuid] = {
+        zoneHex: origHexToZoneHex[originalHex] || null,
+        baseColor: child.material.color.clone(),
+      };
     });
 
     meshDataRef.current = meshData;
     return clone;
-  }, [scene, zoneColors, zones, origHexToZoneHex]);
+  }, [scene, zoneColors, allZonesWithMembers, origHexToZoneHex]);
 
   // Animate: brighten active zone meshes toward white in a slow 1s pulse
   useFrame(({ clock }) => {
-    if (!coloredScene || !activeZone) return;
+    if (!coloredScene) return;
+    const data = meshDataRef.current;
+
+    // When no zone is active, do a one-time reset and stop
+    if (!activeZone) {
+      if (needsResetRef.current) {
+        coloredScene.traverse((child) => {
+          if (!child.isMesh || !child.material) return;
+          const info = data[child.uuid];
+          if (info) child.material.color.copy(info.baseColor);
+        });
+        needsResetRef.current = false;
+      }
+      return;
+    }
+
+    needsResetRef.current = true;
     // Sine wave 0→1→0 over 1 second
     const t = (Math.sin(clock.elapsedTime * Math.PI * 2) + 1) / 2;
     const brightenFactor = t * 0.35; // up to 35% toward white
-    const data = meshDataRef.current;
 
     coloredScene.traverse((child) => {
       if (!child.isMesh || !child.material) return;
@@ -369,7 +385,6 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
       if (info.zoneHex === activeZone) {
         child.material.color.copy(info.baseColor).lerp(whiteColor.current, brightenFactor);
       } else {
-        // Ensure non-active meshes stay at base color
         child.material.color.copy(info.baseColor);
       }
     });
