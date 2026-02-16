@@ -247,12 +247,47 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
         memberHexes: [],
       }));
 
+      // Collect unique mesh colors with their counts
+      const uniqueColors = {};
       for (const mc of meshColors) {
+        if (!uniqueColors[mc.hex]) {
+          uniqueColors[mc.hex] = { ...mc, count: 1 };
+        } else {
+          uniqueColors[mc.hex].count++;
+        }
+      }
+      const uniqueList = Object.values(uniqueColors);
+
+      // Phase 1: Each zone claims its single closest unique mesh color (exclusive)
+      const claimed = new Set();
+      for (const zone of configuredZones) {
+        let bestColor = null;
+        let bestDist = Infinity;
+        for (const uc of uniqueList) {
+          if (claimed.has(uc.hex)) continue;
+          const dist = Math.sqrt(
+            (uc.r - zone.r) ** 2 + (uc.g - zone.g) ** 2 + (uc.b - zone.b) ** 2
+          );
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestColor = uc;
+          }
+        }
+        if (bestColor) {
+          claimed.add(bestColor.hex);
+          zone.count += bestColor.count;
+          zone.memberHexes.push(bestColor.hex);
+        }
+      }
+
+      // Phase 2: Remaining unclaimed colors go to nearest zone
+      for (const uc of uniqueList) {
+        if (claimed.has(uc.hex)) continue;
         let closest = null;
         let closestDist = Infinity;
         for (const zone of configuredZones) {
           const dist = Math.sqrt(
-            (mc.r - zone.r) ** 2 + (mc.g - zone.g) ** 2 + (mc.b - zone.b) ** 2
+            (uc.r - zone.r) ** 2 + (uc.g - zone.g) ** 2 + (uc.b - zone.b) ** 2
           );
           if (dist < closestDist) {
             closestDist = dist;
@@ -260,9 +295,9 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
           }
         }
         if (closest) {
-          closest.count++;
-          if (!closest.memberHexes.includes(mc.hex)) {
-            closest.memberHexes.push(mc.hex);
+          closest.count += uc.count;
+          if (!closest.memberHexes.includes(uc.hex)) {
+            closest.memberHexes.push(uc.hex);
           }
         }
       }
@@ -393,7 +428,7 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
   return <primitive object={coloredScene} scale={scale} />;
 }
 
-function STLModel({ path, scale, color, colorOverride }) {
+function STLModel({ path, scale, color, colorOverride, rotation }) {
   const geometry = useLoader(STLLoader, path);
 
   useMemo(() => {
@@ -412,7 +447,7 @@ function STLModel({ path, scale, color, colorOverride }) {
   }, [geometry, scale]);
 
   return (
-    <mesh geometry={geometry} scale={normalizedScale}>
+    <mesh geometry={geometry} scale={normalizedScale} rotation={rotation || [0, 0, 0]}>
       <meshStandardMaterial
         color={colorOverride || color || "#C9A84C"}
         metalness={0.1}
@@ -438,7 +473,7 @@ export default function ModelLoader({ product, colorOverride, zoneColors, onZone
     case "gltf":
       return <GLBModel path={product.modelPath} scale={product.scale} zoneColors={zoneColors} onZonesDetected={onZonesDetected} zoneConfig={product.zoneConfig} activeZone={activeZone} />;
     case "stl":
-      return <STLModel path={product.modelPath} scale={product.scale} color={product.color} colorOverride={colorOverride} />;
+      return <STLModel path={product.modelPath} scale={product.scale} color={product.color} colorOverride={colorOverride} rotation={product.modelRotation} />;
     default:
       return (
         <PlaceholderGeometry

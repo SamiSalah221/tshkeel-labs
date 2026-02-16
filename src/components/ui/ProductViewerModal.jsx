@@ -190,7 +190,10 @@ export default function ProductViewerModal({ product, onClose }) {
                       <button
                         type="button"
                         key={opt.hex}
-                        onClick={() => setZoneColors((prev) => ({ ...prev, [activeZone]: opt.hex }))}
+                        onClick={() => {
+                          setZoneColors((prev) => ({ ...prev, [activeZone]: opt.hex }));
+                          setActiveZone(null);
+                        }}
                         title={opt.name}
                         className="cursor-pointer"
                         style={{
