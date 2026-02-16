@@ -1,6 +1,6 @@
 import { useGLTF } from "@react-three/drei";
-import { useLoader } from "@react-three/fiber";
-import { useMemo, useEffect } from "react";
+import { useLoader, useFrame } from "@react-three/fiber";
+import { useMemo, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 
@@ -202,8 +202,9 @@ function PlaceholderGeometry({ type, color, colorOverride }) {
   }
 }
 
-function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig }) {
+function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, activeZone }) {
   const { scene } = useGLTF(path);
+  const emissiveColor = useRef(new THREE.Color("#C9A84C"));
 
   // Detect color zones from the original scene, using zoneConfig when available
   const zones = useMemo(() => {
@@ -327,6 +328,49 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig }) {
     return clone;
   }, [scene, zoneColors, zones]);
 
+  // Build lookup: original mesh hex → zone hex key (for highlight matching)
+  const origHexToZoneHex = useMemo(() => {
+    const map = {};
+    for (const zone of zones) {
+      for (const mh of zone.memberHexes) {
+        map[mh] = zone.hex;
+      }
+    }
+    return map;
+  }, [zones]);
+
+  // Animate emissive glow on meshes belonging to the active zone
+  useFrame(({ clock }) => {
+    if (!coloredScene) return;
+    const pulse = activeZone ? 0.3 + 0.3 * Math.sin(clock.elapsedTime * 2) : 0;
+
+    coloredScene.traverse((child) => {
+      if (!child.isMesh || !child.material) return;
+      // Determine which zone this mesh belongs to by checking original colors
+      // When colors are overridden, the hex changes, so we need to check both
+      const currentHex = "#" + child.material.color.getHexString();
+      // Try to find zone via current color or via any known mapping
+      let meshZoneHex = origHexToZoneHex[currentHex];
+      // If color was overridden, the currentHex won't be in origHexToZoneHex.
+      // Check if currentHex is an override value for any zone.
+      if (!meshZoneHex && zoneColors) {
+        for (const [zoneHex, overrideHex] of Object.entries(zoneColors)) {
+          if (overrideHex === currentHex) {
+            meshZoneHex = zoneHex;
+            break;
+          }
+        }
+      }
+
+      if (activeZone && meshZoneHex === activeZone) {
+        child.material.emissive = emissiveColor.current;
+        child.material.emissiveIntensity = pulse;
+      } else {
+        child.material.emissiveIntensity = 0;
+      }
+    });
+  });
+
   return <primitive object={coloredScene} scale={scale} />;
 }
 
@@ -359,7 +403,7 @@ function STLModel({ path, scale, color, colorOverride }) {
   );
 }
 
-export default function ModelLoader({ product, colorOverride, zoneColors, onZonesDetected }) {
+export default function ModelLoader({ product, colorOverride, zoneColors, onZonesDetected, activeZone }) {
   if (!product.modelPath) {
     return (
       <PlaceholderGeometry
@@ -373,7 +417,7 @@ export default function ModelLoader({ product, colorOverride, zoneColors, onZone
   switch (product.modelType) {
     case "glb":
     case "gltf":
-      return <GLBModel path={product.modelPath} scale={product.scale} zoneColors={zoneColors} onZonesDetected={onZonesDetected} zoneConfig={product.zoneConfig} />;
+      return <GLBModel path={product.modelPath} scale={product.scale} zoneColors={zoneColors} onZonesDetected={onZonesDetected} zoneConfig={product.zoneConfig} activeZone={activeZone} />;
     case "stl":
       return <STLModel path={product.modelPath} scale={product.scale} color={product.color} colorOverride={colorOverride} />;
     default:
