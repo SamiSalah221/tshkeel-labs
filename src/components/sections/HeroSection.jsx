@@ -1,17 +1,6 @@
-import { useContext } from "react";
 import { motion } from "framer-motion";
-import { ScrollContext } from "../../contexts/ScrollContext";
 
-export default function HeroSection({ config }) {
-  const { scrollToSection, isMobile, setMobileView } = useContext(ScrollContext);
-
-  const handleBrowseProducts = () => {
-    if (isMobile) {
-      setMobileView("products");
-    } else {
-      scrollToSection("products");
-    }
-  };
+export default function HeroSection({ config, onBrowseProducts, onCustomOrder }) {
 
   return (
     <section
@@ -46,14 +35,14 @@ export default function HeroSection({ config }) {
         <div className="flex flex-col items-center gap-3 mt-6">
           <button
             type="button"
-            onClick={handleBrowseProducts}
+            onClick={onBrowseProducts}
             className="btn btn-md btn-primary"
           >
             Browse Products
           </button>
           <button
             type="button"
-            onClick={() => scrollToSection("customquote")}
+            onClick={onCustomOrder}
             className="btn btn-ghost"
             style={{ color: 'var(--color-text-muted)' }}
           >

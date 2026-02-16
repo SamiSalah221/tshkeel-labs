@@ -160,7 +160,17 @@ function AppContent() {
                   {(!isMobile || mobileView === "home") && (
                     <>
                       {theme.showSeasonalBanner && <SeasonalBanner />}
-                      <HeroSection config={siteConfig} />
+                      <HeroSection
+                        config={siteConfig}
+                        onBrowseProducts={() => {
+                          if (isMobile) {
+                            setMobileView("products");
+                          } else {
+                            scrollToSectionRef.current("products");
+                          }
+                        }}
+                        onCustomOrder={() => scrollToSectionRef.current("customquote")}
+                      />
                       <AboutSection config={siteConfig} />
                       <HowItWorks />
                     </>
