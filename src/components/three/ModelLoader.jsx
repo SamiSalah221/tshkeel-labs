@@ -4,11 +4,6 @@ import { useMemo, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 
-// Convert linear RGB (Three.js internal) to sRGB for accurate distance comparison
-function linearToSRGB(c) {
-  return c <= 0.0031308 ? c * 12.92 : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
-}
-
 function PlaceholderGeometry({ type, color, colorOverride }) {
   const matProps = { color: colorOverride || color || "#C9A84C", metalness: 0.8, roughness: 0.2 };
 
@@ -223,9 +218,9 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
         const c = child.material.color;
         meshColors.push({
           hex: "#" + c.getHexString(),
-          r: Math.round(linearToSRGB(c.r) * 255),
-          g: Math.round(linearToSRGB(c.g) * 255),
-          b: Math.round(linearToSRGB(c.b) * 255),
+          r: Math.round(c.r * 255),
+          g: Math.round(c.g * 255),
+          b: Math.round(c.b * 255),
         });
       }
     });
