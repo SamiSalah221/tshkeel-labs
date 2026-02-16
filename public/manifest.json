@@ -1,0 +1,16 @@
+{
+  "name": "Tshkeel Labs",
+  "short_name": "Tshkeel Labs",
+  "description": "3D printed Islamic decor, custom Quran stands, calligraphy art, and faith-inspired pieces.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B2240",
+  "theme_color": "#102E50",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

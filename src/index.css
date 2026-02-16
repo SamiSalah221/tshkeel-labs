@@ -1,0 +1,342 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Saltza';
+  src: url('/fonts/Saltza.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  /* Dome of the Rock inspired palette */
+  --color-primary: #102E50;           /* Deep royal navy */
+  --color-primary-dark: #0B2240;      /* Darker navy */
+  --color-primary-light: #1A4068;     /* Lighter navy */
+  --color-accent: #C9A84C;            /* Rich gold - calligraphy & borders */
+  --color-accent-light: #E2C66D;      /* Lighter gold */
+  --color-accent-dark: #9B7E2E;       /* Darker gold */
+  --color-tile: #2574A8;              /* Royal tile blue */
+  --color-tile-light: #3A92C8;        /* Lighter tile blue */
+  --color-tile-dark: #1A5580;         /* Darker tile blue */
+  --color-turquoise: #3BB8D0;         /* Bright cyan-turquoise */
+  --color-turquoise-light: #5CD4E8;   /* Light turquoise */
+  --color-bg: #4A90C8;               /* Light tile blue */
+  --color-bg-card: #FFFFFF;            /* White card background (frosted glass at 85%) */
+  --color-bg-dark: #0E2640;           /* Darkest blue (footer/modal) */
+  --color-text: #1E293B;             /* Dark slate body text */
+  --color-text-muted: #334155;       /* Darker slate secondary text */
+  --color-text-bright: #0F172A;       /* Near-black emphasis */
+  --color-text-on-dark: #CBD5E1;     /* Light slate for dark contexts — WCAG AA */
+  --color-whatsapp: #25d366;
+  --color-dome: #C9A84C;             /* Alias for gold */
+  --color-dome-light: #E2C66D;       /* Lighter dome gold */
+
+  /* ── Layout Max-Widths ── */
+  --max-w-narrow: 48rem;              /* Contact, FAQ, CustomCTA */
+  --max-w-content: 80rem;             /* Products, About, Testimonials, HowItWorks */
+  --max-w-wide: 72rem;                /* Footer */
+
+  /* ── Border Radii ── */
+  --radius-md: 0.75rem;               /* buttons */
+  --radius-lg: 1rem;                  /* cards, panels */
+
+  /* ── Focus Ring ── */
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--color-accent) 50%, transparent);
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+h1, h2, h3 {
+  font-family: 'Saltza', 'Inter', system-ui, sans-serif;
+  letter-spacing: 0.05em;
+}
+
+/* Smooth theme color transitions — scoped to avoid interfering with tilt/motion animations */
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, fill 0.4s ease, stroke 0.4s ease !important;
+}
+
+/* Decorative verse band - geometric border pattern */
+.verse-band {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  color: var(--color-accent);
+  font-size: 1.25rem;
+  letter-spacing: 0.3em;
+  opacity: 0.7;
+  user-select: none;
+}
+
+.verse-band::before,
+.verse-band::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-accent) 20%,
+    var(--color-accent) 80%,
+    transparent
+  );
+}
+
+/* Bismillah verse band - Arabic calligraphy style */
+.verse-band-bismillah {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0.75rem 0;
+  color: var(--color-accent);
+  font-family: 'Amiri', 'Noto Naskh Arabic', serif;
+  font-size: 1.5rem;
+  direction: rtl;
+  opacity: 0.8;
+  user-select: none;
+}
+
+.verse-band-bismillah::before,
+.verse-band-bismillah::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-accent) 15%,
+    var(--color-accent) 85%,
+    transparent
+  );
+}
+
+/* Islamic geometric tile background pattern */
+.islamic-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  background-image:
+    /* Side frame gradients - dark navy */
+    linear-gradient(90deg, rgba(14, 38, 64, 0.25) 0%, transparent 5%),
+    linear-gradient(-90deg, rgba(14, 38, 64, 0.25) 0%, transparent 5%),
+    /* Subtle center darkening */
+    radial-gradient(ellipse at 50% 50%, rgba(14, 38, 64, 0.08) 0%, transparent 60%),
+    /* 10-pointed star girih pattern - dark navy strokes on light blue */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='none' stroke='%230E2640'%3E%3Cpolygon points='50,10 57,29 74,18 68,37 88,38 72,50 88,62 68,63 74,82 57,71 50,90 43,71 26,82 32,63 12,62 28,50 12,38 32,37 26,18 43,29' stroke-width='0.7' opacity='0.35'/%3E%3Cpolygon points='57,29 68,37 72,50 68,63 57,71 43,71 32,63 28,50 32,37 43,29' stroke-width='0.5' opacity='0.20'/%3E%3Cg stroke-width='0.5' opacity='0.28'%3E%3Cpath d='M50,10L54,0 M50,10L46,0 M74,18L79,0 M74,18L99,0 M88,38L100,28 M88,38L100,38 M88,62L100,62 M88,62L100,72 M74,82L99,100 M74,82L79,100 M50,90L46,100 M50,90L54,100 M26,82L21,100 M26,82L1,100 M12,62L0,72 M12,62L0,62 M12,38L0,38 M12,38L0,28 M26,18L1,0 M26,18L21,0'/%3E%3C/g%3E%3C/svg%3E"),
+    /* Fine diamond lattice underlay - dark navy */
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 19px,
+      rgba(14, 38, 64, 0.05) 19px,
+      rgba(14, 38, 64, 0.05) 20px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 19px,
+      rgba(14, 38, 64, 0.05) 19px,
+      rgba(14, 38, 64, 0.05) 20px
+    );
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100px 100px, auto, auto;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, repeat, repeat;
+}
+
+/* Nerdy hex/dot grid background pattern (purple-to-black gradient theme) */
+.nerdy-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  background-image:
+    /* Purple-to-black vertical gradient overlay */
+    linear-gradient(
+      180deg,
+      rgba(140, 44, 235, 0.18) 0%,
+      rgba(76, 13, 139, 0.12) 20%,
+      rgba(30, 10, 58, 0.08) 50%,
+      rgba(5, 2, 8, 0.3) 80%,
+      rgba(0, 0, 0, 0.5) 100%
+    ),
+    /* Side frame gradients - dark edges */
+    linear-gradient(90deg, rgba(5, 2, 8, 0.4) 0%, transparent 5%),
+    linear-gradient(-90deg, rgba(5, 2, 8, 0.4) 0%, transparent 5%),
+    /* Hex grid pattern */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='52' fill='none'%3E%3Cpolygon points='30,2 55,15 55,37 30,50 5,37 5,15' stroke='%234c0d8b' stroke-width='0.6' opacity='0.2' fill='none'/%3E%3Ccircle cx='30' cy='26' r='2' fill='%238c2ceb' opacity='0.06'/%3E%3C/svg%3E"),
+    /* Dot grid */
+    radial-gradient(circle, rgba(140, 44, 235, 0.06) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 60px 52px, 20px 20px;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, repeat;
+}
+
+/* Flags background pattern (dusty blue-grey theme) */
+.flags-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  background-image:
+    linear-gradient(90deg, rgba(58, 67, 76, 0.25) 0%, transparent 5%),
+    linear-gradient(-90deg, rgba(58, 67, 76, 0.25) 0%, transparent 5%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' fill='none'%3E%3Ccircle cx='40' cy='40' r='12' stroke='%234e5a65' stroke-width='0.4' opacity='0.08'/%3E%3Cline x1='40' y1='24' x2='40' y2='56' stroke='%23748a9e' stroke-width='0.3' opacity='0.12'/%3E%3Cline x1='24' y1='40' x2='56' y2='40' stroke='%23748a9e' stroke-width='0.3' opacity='0.12'/%3E%3Ccircle cx='40' cy='40' r='2' fill='%23b5c9d5' opacity='0.06'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 39px,
+      rgba(78, 90, 101, 0.06) 39px,
+      rgba(78, 90, 101, 0.06) 40px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 39px,
+      rgba(78, 90, 101, 0.06) 39px,
+      rgba(78, 90, 101, 0.06) 40px
+    );
+  background-size: 100% 100%, 100% 100%, 80px 80px, auto, auto;
+  background-repeat: no-repeat, no-repeat, repeat, repeat, repeat;
+}
+
+/* Visually hidden but accessible to screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ── Focus-visible ring for keyboard navigation ── */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ── Dark immersive panel (Contact, CustomCTA, Testimonials) ── */
+.dark-panel {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-bg-dark) 93%, transparent) 0%,
+    color-mix(in srgb, var(--color-primary) 93%, transparent) 100%
+  );
+  border: 1px solid color-mix(in srgb, var(--color-accent) 25%, transparent);
+  border-radius: var(--radius-lg);
+}
+
+/* ── Frosted glass card (About, HowItWorks, FAQ) ── */
+.frosted-card {
+  background: color-mix(in srgb, var(--color-bg-card) 85%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 25%, transparent);
+  border-radius: var(--radius-lg);
+}
+
+/* ── Button System ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 44px;
+}
+.btn-md { padding: 0.75rem 2rem; font-size: 1rem; }
+.btn-sm { padding: 0.625rem 1rem; font-size: 0.875rem; }
+.btn-primary { background-color: var(--color-accent); color: var(--color-primary-dark); }
+.btn-primary:hover { background-color: var(--color-accent-light); }
+.btn-secondary {
+  background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+}
+.btn-secondary:hover { background-color: color-mix(in srgb, var(--color-accent) 20%, transparent); }
+.btn-ghost { background: none; border: none; color: var(--color-text-on-dark); padding: 0.5rem 0.75rem; font-size: 0.875rem; }
+.btn-ghost:hover { color: var(--color-accent); }
+.btn-whatsapp { background-color: var(--color-whatsapp); color: white; }
+.btn-whatsapp:hover { background-color: color-mix(in srgb, var(--color-whatsapp) 80%, black); }
+.btn-block { width: 100%; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Product card hover lift ── */
+.product-card-hover {
+  transition: box-shadow 0.3s ease;
+}
+.product-card-hover:hover {
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-accent) 20%, transparent);
+}
+
+@keyframes toastSlideIn {
+  0% { opacity: 0; transform: translateX(100%); }
+  8% { opacity: 1; transform: translateX(0); }
+  75% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(100%); }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* ── Print stylesheet ── */
+@media print {
+  canvas,
+  .fixed,
+  [style*="position: fixed"],
+  .islamic-bg,
+  .nerdy-bg,
+  .flags-bg,
+  .verse-band,
+  .verse-band-bismillah {
+    display: none !important;
+  }
+  html, body, #root {
+    overflow: visible !important;
+    height: auto !important;
+    background: white !important;
+    color: black !important;
+  }
+  section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .dark-panel {
+    background: #f3f4f6 !important;
+    color: black !important;
+    border-color: #d1d5db !important;
+  }
+  .dark-panel * {
+    color: black !important;
+  }
+}
