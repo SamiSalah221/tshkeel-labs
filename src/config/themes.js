@@ -1,3 +1,5 @@
+const B = import.meta.env.BASE_URL;
+
 export const THEMES = {
   islamic: {
     id: "islamic",
@@ -33,28 +35,28 @@ export const THEMES = {
         "#1A5580", "#5CD4E8", "#28B5A4", "#9B7E2E",
       ],
       glbModels: [
-        "/models/islamic/fanoos.glb",
-        "/models/islamic/crescent-elegant.glb",
-        "/models/islamic/crescent-bismillah.glb",
-        "/models/islamic/crescent-ramadan.glb",
-        "/models/islamic/miniature-al-aqsa-mosque.glb",
-        "/models/islamic/ramadan-fanoos.glb",
-        "/models/islamic/crescent-dates-pot.glb",
-        "/models/islamic/pot-dates-holder.glb",
-        "/models/islamic/ramadan-stand.glb",
-        "/models/islamic/ramadan-crescent-with-floats.glb",
-        "/models/islamic/la-ilaha-illa-allah-wall-art.glb",
-        "/models/islamic/alhamdulillah-wall-art.glb",
-        "/models/islamic/hijri-calendar.glb",
-        "/models/islamic/ayat-al-kursi.glb",
-        "/models/islamic/prayer-bead-stand.glb",
-        "/models/islamic/eid-cash-gift-tube.stl",
-        "/models/islamic/hasbunallah-wall-art.stl",
-        "/models/islamic/miniature-hanging-lamp.stl",
-        "/models/islamic/quran-prayer-holder.stl",
-        "/models/islamic/madina-keychain.glb",
-        "/models/islamic/al-aqsa-keychain.glb",
-        "/models/islamic/kaaba-keychain.glb",
+        `${B}models/islamic/fanoos.glb`,
+        `${B}models/islamic/crescent-elegant.glb`,
+        `${B}models/islamic/crescent-bismillah.glb`,
+        `${B}models/islamic/crescent-ramadan.glb`,
+        `${B}models/islamic/miniature-al-aqsa-mosque.glb`,
+        `${B}models/islamic/ramadan-fanoos.glb`,
+        `${B}models/islamic/crescent-dates-pot.glb`,
+        `${B}models/islamic/pot-dates-holder.glb`,
+        `${B}models/islamic/ramadan-stand.glb`,
+        `${B}models/islamic/ramadan-crescent-with-floats.glb`,
+        `${B}models/islamic/la-ilaha-illa-allah-wall-art.glb`,
+        `${B}models/islamic/alhamdulillah-wall-art.glb`,
+        `${B}models/islamic/hijri-calendar.glb`,
+        `${B}models/islamic/ayat-al-kursi.glb`,
+        `${B}models/islamic/prayer-bead-stand.glb`,
+        `${B}models/islamic/eid-cash-gift-tube.stl`,
+        `${B}models/islamic/hasbunallah-wall-art.stl`,
+        `${B}models/islamic/miniature-hanging-lamp.stl`,
+        `${B}models/islamic/quran-prayer-holder.stl`,
+        `${B}models/islamic/madina-keychain.glb`,
+        `${B}models/islamic/al-aqsa-keychain.glb`,
+        `${B}models/islamic/kaaba-keychain.glb`,
       ],
       lightColors: {
         warm: "#FFE4A0",
@@ -107,7 +109,7 @@ export const THEMES = {
         "#6A2DB8", "#66FFB3", "#241434", "#00CC6A",
       ],
       glbModels: [
-        // Add nerdy GLB models here as they are created (e.g., "/models/nerdy/dice-tower.glb")
+        // Add nerdy GLB models here as they are created (e.g., `${B}models/nerdy/dice-tower.glb")
       ],
       lightColors: {
         warm: "#D4A8FF",
@@ -160,7 +162,7 @@ export const THEMES = {
         "#A5D1DD", "#3B4856", "#beb8b1", "#6B7D8D",
       ],
       glbModels: [
-        // Add flags GLB models here as they are created (e.g., "/models/flags/flag-stand.glb")
+        // Add flags GLB models here as they are created (e.g., `${B}models/flags/flag-stand.glb")
       ],
       lightColors: {
         warm: "#D4A07A",
