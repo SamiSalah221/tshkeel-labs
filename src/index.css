@@ -259,6 +259,8 @@ textarea:focus-visible,
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid color-mix(in srgb, var(--color-accent) 25%, transparent);
   border-radius: var(--radius-lg);
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Button System ── */
