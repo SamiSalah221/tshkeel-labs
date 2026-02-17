@@ -4,6 +4,9 @@ import { useFrame, useThree, useLoader } from "@react-three/fiber";
 import { useScroll, useGLTF } from "@react-three/drei";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 
+// Cache mobile detection once at module level (avoid checking every frame)
+const IS_MOBILE = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
+
 // Error boundary to gracefully handle GLB load failures
 class GLBErrorBoundary extends Component {
   constructor(props) {
@@ -41,9 +44,10 @@ const COLORS = [
   "#9B7E2E", // dark gold
 ];
 
-function FloatingModel({ geometryType, color, position, scale, index }) {
+function FloatingModel({ geometryType, color, position, scale, index, scrollRef, viewportH }) {
   const meshRef = useRef();
   const initialPos = useMemo(() => [...position], [position]);
+  const frameCount = useRef(0);
 
   const geometry = useMemo(() => {
     switch (geometryType) {
@@ -68,13 +72,26 @@ function FloatingModel({ geometryType, color, position, scale, index }) {
 
   useFrame((state) => {
     if (!meshRef.current) return;
+
+    // Viewport culling — hide models far from scroll position
+    if (scrollRef) {
+      const viewCenter = viewportH / 2 - scrollRef.current;
+      if (Math.abs(initialPos[1] - viewCenter) > viewportH * 2) {
+        meshRef.current.visible = false;
+        return;
+      }
+      meshRef.current.visible = true;
+    }
+
+    // Frame throttling on mobile — skip every other frame
+    frameCount.current++;
+    if (IS_MOBILE && frameCount.current % 2 !== 0) return;
+
     const t = state.clock.elapsedTime;
     const pointer = state.pointer;
 
-    // Per-shape parallax strength based on index (reduced on mobile)
-    const isMobileDevice = window.innerWidth <= 768;
-    const baseStrength = isMobileDevice ? 0.15 : 0.3;
-    const strength = baseStrength + (index % 5) * (isMobileDevice ? 0.05 : 0.15);
+    const baseStrength = IS_MOBILE ? 0.15 : 0.3;
+    const strength = baseStrength + (index % 5) * (IS_MOBILE ? 0.05 : 0.15);
 
     // Uniform slow rotation
     meshRef.current.rotation.x += 0.002;
@@ -101,9 +118,10 @@ function FloatingModel({ geometryType, color, position, scale, index }) {
   );
 }
 
-function FloatingGLBModel({ modelPath, position, scale, index }) {
+function FloatingGLBModel({ modelPath, position, scale, index, scrollRef, viewportH }) {
   const groupRef = useRef();
   const initialPos = useMemo(() => [...position], [position]);
+  const frameCount = useRef(0);
   const { scene } = useGLTF(modelPath);
 
   const clonedScene = useMemo(() => {
@@ -131,12 +149,26 @@ function FloatingGLBModel({ modelPath, position, scale, index }) {
 
   useFrame((state) => {
     if (!groupRef.current) return;
+
+    // Viewport culling
+    if (scrollRef) {
+      const viewCenter = viewportH / 2 - scrollRef.current;
+      if (Math.abs(initialPos[1] - viewCenter) > viewportH * 2) {
+        groupRef.current.visible = false;
+        return;
+      }
+      groupRef.current.visible = true;
+    }
+
+    // Frame throttling on mobile
+    frameCount.current++;
+    if (IS_MOBILE && frameCount.current % 2 !== 0) return;
+
     const t = state.clock.elapsedTime;
     const pointer = state.pointer;
 
-    const isMobileDevice = window.innerWidth <= 768;
-    const baseStrength = isMobileDevice ? 0.15 : 0.3;
-    const strength = baseStrength + (index % 5) * (isMobileDevice ? 0.05 : 0.15);
+    const baseStrength = IS_MOBILE ? 0.15 : 0.3;
+    const strength = baseStrength + (index % 5) * (IS_MOBILE ? 0.05 : 0.15);
 
     groupRef.current.rotation.x += 0.002;
     groupRef.current.rotation.y += 0.003;
@@ -154,9 +186,10 @@ function FloatingGLBModel({ modelPath, position, scale, index }) {
   );
 }
 
-function FloatingSTLModel({ modelPath, position, scale, index }) {
+function FloatingSTLModel({ modelPath, position, scale, index, scrollRef, viewportH }) {
   const groupRef = useRef();
   const initialPos = useMemo(() => [...position], [position]);
+  const frameCount = useRef(0);
   const geometry = useLoader(STLLoader, modelPath);
 
   useMemo(() => {
@@ -174,12 +207,26 @@ function FloatingSTLModel({ modelPath, position, scale, index }) {
 
   useFrame((state) => {
     if (!groupRef.current) return;
+
+    // Viewport culling
+    if (scrollRef) {
+      const viewCenter = viewportH / 2 - scrollRef.current;
+      if (Math.abs(initialPos[1] - viewCenter) > viewportH * 2) {
+        groupRef.current.visible = false;
+        return;
+      }
+      groupRef.current.visible = true;
+    }
+
+    // Frame throttling on mobile
+    frameCount.current++;
+    if (IS_MOBILE && frameCount.current % 2 !== 0) return;
+
     const t = state.clock.elapsedTime;
     const pointer = state.pointer;
 
-    const isMobileDevice = window.innerWidth <= 768;
-    const baseStrength = isMobileDevice ? 0.15 : 0.3;
-    const strength = baseStrength + (index % 5) * (isMobileDevice ? 0.05 : 0.15);
+    const baseStrength = IS_MOBILE ? 0.15 : 0.3;
+    const strength = baseStrength + (index % 5) * (IS_MOBILE ? 0.05 : 0.15);
 
     groupRef.current.rotation.x += 0.002;
     groupRef.current.rotation.y += 0.003;
@@ -210,6 +257,12 @@ function FloatingSTLModel({ modelPath, position, scale, index }) {
 export default function FloatingModels({ colors = COLORS, glbModels = [] }) {
   const { viewport } = useThree();
   const scroll = useScroll();
+  const scrollRef = useRef(0);
+
+  // Update scroll position once per frame (single useFrame for all models to read)
+  useFrame(() => {
+    scrollRef.current = scroll.offset * (scroll.pages - 1) * viewport.height;
+  });
 
   const models = useMemo(() => {
     if (!scroll.pages || scroll.pages <= 0) return [];
@@ -219,11 +272,10 @@ export default function FloatingModels({ colors = COLORS, glbModels = [] }) {
     const totalHeight = scroll.pages * viewport.height;
 
     // Checkerboard grid settings — reduced density on mobile
-    const isMobile = window.matchMedia('(max-width: 768px)').matches;
-    const cols = isMobile ? 3 : 5;
-    const rowSpacing = isMobile ? 3.0 : 2.2;
+    const cols = IS_MOBILE ? 3 : 5;
+    const rowSpacing = IS_MOBILE ? 3.0 : 2.2;
     const colSpacing = viewport.width / (cols - 1); // edge-to-edge spacing
-    const fixedScale = isMobile ? 0.2 : 0.25;
+    const fixedScale = IS_MOBILE ? 0.2 : 0.25;
     const fixedZ = -3;
 
     // Exclude shapes from the center area where HTML content sits
@@ -293,11 +345,13 @@ export default function FloatingModels({ colors = COLORS, glbModels = [] }) {
                 color={colors[i % colors.length]}
                 position={model.position}
                 scale={model.scale * 0.4}
+                scrollRef={scrollRef}
+                viewportH={viewport.height}
               />
             }
           >
             <Suspense fallback={null}>
-              <FloatingSTLModel index={i} modelPath={model.modelPath} position={model.position} scale={model.scale} />
+              <FloatingSTLModel index={i} modelPath={model.modelPath} position={model.position} scale={model.scale} scrollRef={scrollRef} viewportH={viewport.height} />
             </Suspense>
           </GLBErrorBoundary>
         ) : model.isGLB ? (
@@ -310,15 +364,17 @@ export default function FloatingModels({ colors = COLORS, glbModels = [] }) {
                 color={colors[i % colors.length]}
                 position={model.position}
                 scale={model.scale * 0.4}
+                scrollRef={scrollRef}
+                viewportH={viewport.height}
               />
             }
           >
             <Suspense fallback={null}>
-              <FloatingGLBModel index={i} modelPath={model.modelPath} position={model.position} scale={model.scale} />
+              <FloatingGLBModel index={i} modelPath={model.modelPath} position={model.position} scale={model.scale} scrollRef={scrollRef} viewportH={viewport.height} />
             </Suspense>
           </GLBErrorBoundary>
         ) : (
-          <FloatingModel key={i} index={i} {...model} />
+          <FloatingModel key={i} index={i} {...model} scrollRef={scrollRef} viewportH={viewport.height} />
         )
       )}
     </group>

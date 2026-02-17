@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import { Environment } from "@react-three/drei";
 
+const IS_MOBILE = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
+
 export default function Lighting({ lightColors }) {
   return (
     <>
@@ -15,14 +17,16 @@ export default function Lighting({ lightColors }) {
         intensity={0.4}
         color={lightColors.cool}
       />
-      <directionalLight
-        position={[0, -3, 3]}
-        intensity={0.2}
-        color={lightColors.accent}
-      />
+      {!IS_MOBILE && (
+        <directionalLight
+          position={[0, -3, 3]}
+          intensity={0.2}
+          color={lightColors.accent}
+        />
+      )}
       {/* Note: "Program Info Log" warnings from Environment HDRI shader compilation are cosmetic and expected */}
       <Suspense fallback={null}>
-        <Environment preset="sunset" />
+        {!IS_MOBILE && <Environment preset="sunset" />}
       </Suspense>
     </>
   );

@@ -141,8 +141,8 @@ function AppContent() {
         <Suspense fallback={<LoadingScreen />}>
           <Canvas
             camera={{ position: [0, 0, 6], fov: 50 }}
-            dpr={[1, 2]}
-            gl={{ antialias: true }}
+            dpr={isMobile ? [1, 1.5] : [1, 2]}
+            gl={{ antialias: !isMobile, powerPreference: "high-performance" }}
           >
             <color attach="background" args={[theme.scene.canvasBackground]} />
             <ScrollControls pages={pages} damping={0.25}>
