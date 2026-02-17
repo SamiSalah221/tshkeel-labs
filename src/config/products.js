@@ -1,5 +1,9 @@
 const B = import.meta.env.BASE_URL;
 
+// iPhone 17 dimensions in mm (for size reference in 3D viewer)
+export const IPHONE_DIMENSIONS = { w: 71.5, h: 149.6, d: 7.95 };
+export const IPHONE_MODEL_PATH = `${B}models/iphone 17.glb`;
+
 export const FILAMENT_COLORS = [
   { category: "Neutrals", colors: [
     { name: "White", hex: "#FFFFFF" },
@@ -49,6 +53,7 @@ export const islamicProducts = [
     placeholderGeometry: "crescentMoon",
     color: "#C9A84C",
     scale: 1.2,
+    dimensions: { w: 135.2, h: 57.9, d: 122.8 },
     category: "Decor",
     colorOptions: FILAMENT_COLORS,
     zoneConfig: [
@@ -70,6 +75,7 @@ export const islamicProducts = [
     placeholderGeometry: "mosque",
     color: "#1B5E8A",
     scale: 1.3,
+    dimensions: { w: 60.0, h: 69.3, d: 49.3 },
     category: "Decor",
     zoneConfig: "none",
     image: `${B}images/products/islamic/mosque miniture.png`,
@@ -103,6 +109,7 @@ export const islamicProducts = [
     placeholderGeometry: "frame",
     color: "#C9A84C",
     scale: 1.2,
+    dimensions: { w: 230, h: 230, d: 15.6 },
     category: "Gift",
     colorOptions: FILAMENT_COLORS,
     zoneConfig: [
@@ -142,6 +149,7 @@ export const islamicProducts = [
     placeholderGeometry: "crescentMoon",
     color: "#C9A84C",
     scale: 1.2,
+    dimensions: { w: 152.5, h: 172.9, d: 5.0 },
     category: "Decor",
     colorOptions: FILAMENT_COLORS,
     zoneConfig: [
@@ -282,6 +290,7 @@ export const islamicProducts = [
     placeholderGeometry: "calligraphyPanel",
     color: "#C9A84C",
     scale: 1.2,
+    dimensions: { w: 211.6, h: 211.6, d: 6.2 },
     category: "Decor",
     colorOptions: FILAMENT_COLORS,
     zoneConfig: [
@@ -302,6 +311,7 @@ export const islamicProducts = [
     placeholderGeometry: "calligraphyPanel",
     color: "#C9A84C",
     scale: 1.2,
+    dimensions: { w: 430.3, h: 825.1, d: 10.0 },
     category: "Decor",
     colorOptions: FILAMENT_COLORS,
     zoneConfig: "single",
@@ -340,6 +350,7 @@ export const islamicProducts = [
     placeholderGeometry: "box",
     color: "#C9A84C",
     scale: 1.2,
+    dimensions: { w: 35.6, h: 30.0, d: 16.7 },
     modelRotation: [0, Math.PI, 0],
     category: "Gift",
     colorOptions: FILAMENT_COLORS,
@@ -357,6 +368,7 @@ export const islamicProducts = [
     placeholderGeometry: "calligraphyPanel",
     color: "#C9A84C",
     scale: 1.2,
+    dimensions: { w: 300.0, h: 108.4, d: 12.0 },
     modelRotation: [0, Math.PI, 0],
     category: "Decor",
     colorOptions: FILAMENT_COLORS,
@@ -374,6 +386,7 @@ export const islamicProducts = [
     placeholderGeometry: "icosahedron",
     color: "#C9A84C",
     scale: 1.3,
+    dimensions: { w: 1.5, h: 113.7, d: 246.9 },
     category: "Decor",
     colorOptions: FILAMENT_COLORS,
     image: `${B}images/products/islamic/Miniature Hanging Lamp.png`,

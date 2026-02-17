@@ -14,6 +14,8 @@ export default function ProductViewerModal({ product, onClose }) {
   const [selectedColor, setSelectedColor] = useState(null);
   // Rotation toggle
   const [autoRotate, setAutoRotate] = useState(true);
+  // Dimensions view toggle
+  const [showDimensions, setShowDimensions] = useState(false);
 
   const isGLB = product?.modelType === "glb" || product?.modelType === "gltf";
 
@@ -30,6 +32,7 @@ export default function ProductViewerModal({ product, onClose }) {
     setZoneColors({});
     setSelectedColor(null);
     setAutoRotate(true);
+    setShowDimensions(false);
   }, [product]);
 
   // Callback for GLBModel to report detected zones
@@ -91,6 +94,20 @@ export default function ProductViewerModal({ product, onClose }) {
                 </svg>
               )}
             </button>
+            {/* Dimensions toggle */}
+            {product.dimensions && (
+              <button
+                type="button"
+                onClick={() => setShowDimensions((prev) => !prev)}
+                className="hover:text-accent transition-colors p-2 cursor-pointer"
+                style={{ color: showDimensions ? "var(--color-accent)" : "#333" }}
+                title={showDimensions ? "Hide dimensions" : "View dimensions"}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M3 21V3m0 18l4-4m-4-3l4-4m-4-3l4-4M21 3H3m18 0v18m0-18l-4 4m4 3l-4 4m4 3l-4 4" />
+                </svg>
+              </button>
+            )}
             {/* Close button */}
             <button
               type="button"
@@ -129,6 +146,7 @@ export default function ProductViewerModal({ product, onClose }) {
                 zoneColors={isGLB ? zoneColors : undefined}
                 onZonesDetected={isGLB ? handleZonesDetected : undefined}
                 activeZone={isGLB ? activeZone : undefined}
+                showDimensions={showDimensions}
               />
             </group>
           </Suspense>

@@ -3,6 +3,7 @@ import { useLoader, useFrame } from "@react-three/fiber";
 import { useMemo, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
+import DimensionsView from "./DimensionsView";
 
 function PlaceholderGeometry({ type, color, colorOverride }) {
   const matProps = { color: colorOverride || color || "#C9A84C", metalness: 0.8, roughness: 0.2 };
@@ -202,7 +203,7 @@ function PlaceholderGeometry({ type, color, colorOverride }) {
   }
 }
 
-function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, activeZone }) {
+function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, activeZone, showDimensions, dimensions }) {
   const { scene } = useGLTF(path);
   const whiteColor = useRef(new THREE.Color(1, 1, 1));
   const needsResetRef = useRef(false);
@@ -425,11 +426,30 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
     });
   });
 
-  return <primitive object={coloredScene} scale={scale} />;
+  // Compute product bounding box for dimensions overlay
+  const productBBox = useMemo(() => {
+    if (!showDimensions || !dimensions || !coloredScene) return null;
+    const box = new THREE.Box3().setFromObject(coloredScene);
+    // Account for the scale applied to the primitive
+    const s = typeof scale === "number" ? scale : 1;
+    box.min.multiplyScalar(s);
+    box.max.multiplyScalar(s);
+    return box;
+  }, [showDimensions, dimensions, coloredScene, scale]);
+
+  return (
+    <>
+      <primitive object={coloredScene} scale={scale} />
+      {showDimensions && productBBox && dimensions && (
+        <DimensionsView productBBox={productBBox} productDimensions={dimensions} />
+      )}
+    </>
+  );
 }
 
-function STLModel({ path, scale, color, colorOverride, rotation }) {
+function STLModel({ path, scale, color, colorOverride, rotation, showDimensions, dimensions }) {
   const geometry = useLoader(STLLoader, path);
+  const meshRef = useRef();
 
   useMemo(() => {
     geometry.center();
@@ -446,18 +466,34 @@ function STLModel({ path, scale, color, colorOverride, rotation }) {
     return maxDim > 0 ? (targetSize / maxDim) * scale : scale;
   }, [geometry, scale]);
 
+  // Compute bounding box for dimensions overlay
+  const productBBox = useMemo(() => {
+    if (!showDimensions || !dimensions) return null;
+    geometry.computeBoundingBox();
+    const box = geometry.boundingBox.clone();
+    const s = typeof normalizedScale === "number" ? normalizedScale : 1;
+    box.min.multiplyScalar(s);
+    box.max.multiplyScalar(s);
+    return box;
+  }, [showDimensions, dimensions, geometry, normalizedScale]);
+
   return (
-    <mesh geometry={geometry} scale={normalizedScale} rotation={rotation || [0, 0, 0]}>
-      <meshStandardMaterial
-        color={colorOverride || color || "#C9A84C"}
-        metalness={0.1}
-        roughness={0.8}
-      />
-    </mesh>
+    <>
+      <mesh ref={meshRef} geometry={geometry} scale={normalizedScale} rotation={rotation || [0, 0, 0]}>
+        <meshStandardMaterial
+          color={colorOverride || color || "#C9A84C"}
+          metalness={0.1}
+          roughness={0.8}
+        />
+      </mesh>
+      {showDimensions && productBBox && dimensions && (
+        <DimensionsView productBBox={productBBox} productDimensions={dimensions} />
+      )}
+    </>
   );
 }
 
-export default function ModelLoader({ product, colorOverride, zoneColors, onZonesDetected, activeZone }) {
+export default function ModelLoader({ product, colorOverride, zoneColors, onZonesDetected, activeZone, showDimensions }) {
   if (!product.modelPath) {
     return (
       <PlaceholderGeometry
@@ -471,9 +507,9 @@ export default function ModelLoader({ product, colorOverride, zoneColors, onZone
   switch (product.modelType) {
     case "glb":
     case "gltf":
-      return <GLBModel path={product.modelPath} scale={product.scale} zoneColors={zoneColors} onZonesDetected={onZonesDetected} zoneConfig={product.zoneConfig} activeZone={activeZone} />;
+      return <GLBModel path={product.modelPath} scale={product.scale} zoneColors={zoneColors} onZonesDetected={onZonesDetected} zoneConfig={product.zoneConfig} activeZone={activeZone} showDimensions={showDimensions} dimensions={product.dimensions} />;
     case "stl":
-      return <STLModel path={product.modelPath} scale={product.scale} color={product.color} colorOverride={colorOverride} rotation={product.modelRotation} />;
+      return <STLModel path={product.modelPath} scale={product.scale} color={product.color} colorOverride={colorOverride} rotation={product.modelRotation} showDimensions={showDimensions} dimensions={product.dimensions} />;
     default:
       return (
         <PlaceholderGeometry
