@@ -42,7 +42,7 @@ export const islamicProducts = [
     name: "Crescent Moon Lamp",
     description:
       "A beautifully crafted 3D-printed crescent moon lamp. Perfect for Ramadan decor or as a year-round reminder of faith.",
-    price: "29.99",
+    price: "24.99",
     currency: "$",
     modelPath: `${B}models/islamic/crescent-elegant.glb`,
     modelType: "glb",
@@ -63,7 +63,7 @@ export const islamicProducts = [
     name: "Mosque Miniature",
     description:
       "A detailed miniature mosque model. A stunning centerpiece for your home or office that captures the beauty of Islamic architecture.",
-    price: "39.99",
+    price: "24.99",
     currency: "$",
     modelPath: `${B}models/islamic/miniature-al-aqsa-mosque.glb`,
     modelType: "glb",
@@ -79,7 +79,7 @@ export const islamicProducts = [
     name: "Prayer Bead Display Stand",
     description:
       "A custom-designed stand to beautifully display your prayer beads (tasbih). Keep your beads organized and within reach.",
-    price: "14.99",
+    price: "18.99",
     currency: "$",
     modelPath: `${B}models/islamic/prayer-bead-stand.glb`,
     modelType: "glb",
@@ -96,7 +96,7 @@ export const islamicProducts = [
     name: "Ayatul Kursi Frame",
     description:
       "A 3D-printed decorative frame featuring Ayatul Kursi. A meaningful gift for weddings, housewarmings, or any special occasion.",
-    price: "27.99",
+    price: "24.99",
     currency: "$",
     modelPath: `${B}models/islamic/ayat-al-kursi.glb`,
     modelType: "glb",
@@ -117,7 +117,7 @@ export const islamicProducts = [
     name: "Fanoos Ramadan Lamp",
     description:
       "A beautifully detailed 3D-printed fanoos (traditional Ramadan lantern). A stunning centerpiece for your iftar table or mantelpiece during the holy month.",
-    price: "34.99",
+    price: "24.99",
     currency: "$",
     modelPath: `${B}models/islamic/fanoos.glb`,
     modelType: "glb",
@@ -135,7 +135,7 @@ export const islamicProducts = [
     name: "Bismillah Crescent Desk Piece",
     description:
       "A beautifully crafted crescent moon with Bismillah calligraphy in raised relief, resting on an elegant base. A meaningful accent piece for your desk or prayer space.",
-    price: "26.99",
+    price: "24.99",
     currency: "$",
     modelPath: `${B}models/islamic/crescent-bismillah.glb`,
     modelType: "glb",
@@ -155,7 +155,7 @@ export const islamicProducts = [
     name: "Crescent Ramadan Centerpiece",
     description:
       "A decorative crescent moon piece with intricate Ramadan-inspired details on an elegant base. Perfect as a table centerpiece during the holy month or year-round display.",
-    price: "28.99",
+    price: "24.99",
     currency: "$",
     modelPath: `${B}models/islamic/crescent-ramadan.glb`,
     modelType: "glb",
@@ -175,7 +175,7 @@ export const islamicProducts = [
     name: "Ramadan Fanoos Lantern",
     description:
       "A traditional Ramadan fanoos lantern with ornate geometric patterns and a warm glow effect. A second unique design to complement your Ramadan decor collection.",
-    price: "32.99",
+    price: "24.99",
     currency: "$",
     modelPath: `${B}models/islamic/ramadan-fanoos.glb`,
     modelType: "glb",
@@ -233,7 +233,7 @@ export const islamicProducts = [
     name: "Ramadan Stand",
     description:
       "A decorative Ramadan-themed display stand, perfect for showcasing dates, sweets, or small lanterns during the holy month.",
-    price: "22.99",
+    price: "24.99",
     currency: "$",
     modelPath: `${B}models/islamic/ramadan-stand.glb`,
     modelType: "glb",
@@ -254,7 +254,7 @@ export const islamicProducts = [
     name: "Ramadan Crescent with Floats",
     description:
       "A beautifully designed crescent with suspended floating accents. A unique Ramadan decoration that adds a modern touch to traditional Islamic aesthetics.",
-    price: "32.99",
+    price: "24.99",
     currency: "$",
     modelPath: `${B}models/islamic/ramadan-crescent-with-floats.glb`,
     modelType: "glb",
@@ -312,7 +312,7 @@ export const islamicProducts = [
     name: "Hijri Calendar Display",
     description:
       "A 3D-printed Hijri calendar display piece. Keep track of the Islamic calendar dates with this functional and decorative piece for your desk or shelf.",
-    price: "19.99",
+    price: "22.99",
     currency: "$",
     modelPath: `${B}models/islamic/hijri-calendar.glb`,
     modelType: "glb",
@@ -333,7 +333,7 @@ export const islamicProducts = [
     name: "Eid Cash Gift Tube",
     description:
       "A tubular Eid gift enclosure where recipients can pull out cash. A creative and fun way to present money gifts during Eid celebrations.",
-    price: "9.99",
+    price: "12.99",
     currency: "$",
     modelPath: `${B}models/islamic/eid-cash-gift-tube.stl`,
     modelType: "stl",
@@ -367,7 +367,7 @@ export const islamicProducts = [
     name: "Miniature Hanging Lamp",
     description:
       "A delicate miniature lamp designed to hang with strings. A charming decorative piece that adds a warm, traditional touch to any room.",
-    price: "14.99",
+    price: "16.99",
     currency: "$",
     modelPath: `${B}models/islamic/miniature-hanging-lamp.stl`,
     modelType: "stl",
@@ -399,7 +399,7 @@ export const islamicProducts = [
     name: "Madina Keychain",
     description:
       "A 3D-printed keychain featuring a miniature Madina landmark design. Carry a piece of the holy city wherever you go — a meaningful everyday accessory.",
-    price: "8.99",
+    price: "6.99",
     currency: "$",
     modelPath: `${B}models/islamic/madina-keychain.glb`,
     modelType: "glb",
@@ -414,7 +414,7 @@ export const islamicProducts = [
     name: "Al-Aqsa Keychain",
     description:
       "A 3D-printed keychain featuring the iconic Al-Aqsa Mosque dome silhouette. A beautiful daily reminder of the holy site — carry it wherever you go.",
-    price: "8.99",
+    price: "6.99",
     currency: "$",
     modelPath: `${B}models/islamic/al-aqsa-keychain.glb`,
     modelType: "glb",
@@ -429,7 +429,7 @@ export const islamicProducts = [
     name: "Kaaba Keychain",
     description:
       "A 3D-printed keychain featuring a miniature Kaaba design. A beautiful reminder of the holiest site in Islam — perfect as a gift or personal keepsake.",
-    price: "8.99",
+    price: "6.99",
     currency: "$",
     modelPath: `${B}models/islamic/kaaba-keychain.glb`,
     modelType: "glb",
