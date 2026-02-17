@@ -46,7 +46,7 @@ export const islamicProducts = [
     name: "Crescent Moon Lamp",
     description:
       "A beautifully crafted 3D-printed crescent moon lamp. Perfect for Ramadan decor or as a year-round reminder of faith.",
-    price: "24.99",
+    price: "19.99",
     currency: "$",
     modelPath: `${B}models/islamic/crescent-elegant.glb`,
     modelType: "glb",
@@ -68,7 +68,7 @@ export const islamicProducts = [
     name: "Mosque Miniature",
     description:
       "A detailed miniature mosque model. A stunning centerpiece for your home or office that captures the beauty of Islamic architecture.",
-    price: "24.99",
+    price: "19.99",
     currency: "$",
     modelPath: `${B}models/islamic/miniature-al-aqsa-mosque.glb`,
     modelType: "glb",
@@ -85,7 +85,7 @@ export const islamicProducts = [
     name: "Prayer Bead Display Stand",
     description:
       "A custom-designed stand to beautifully display your prayer beads (tasbih). Keep your beads organized and within reach.",
-    price: "18.99",
+    price: "10.99",
     currency: "$",
     modelPath: `${B}models/islamic/prayer-bead-stand.glb`,
     modelType: "glb",
@@ -125,7 +125,7 @@ export const islamicProducts = [
     name: "Fanoos Ramadan Lamp",
     description:
       "A beautifully detailed 3D-printed fanoos (traditional Ramadan lantern). A stunning centerpiece for your iftar table or mantelpiece during the holy month.",
-    price: "24.99",
+    price: "22.99",
     currency: "$",
     modelPath: `${B}models/islamic/fanoos.glb`,
     modelType: "glb",
@@ -186,7 +186,7 @@ export const islamicProducts = [
     name: "Ramadan Fanoos Lantern",
     description:
       "A traditional Ramadan fanoos lantern with ornate geometric patterns and a warm glow effect. A second unique design to complement your Ramadan decor collection.",
-    price: "24.99",
+    price: "22.99",
     currency: "$",
     modelPath: `${B}models/islamic/ramadan-fanoos.glb`,
     modelType: "glb",
@@ -204,7 +204,7 @@ export const islamicProducts = [
     name: "Crescent Dates Pot",
     description:
       "A crescent moon-shaped pot designed to hold and serve dates. Combines Islamic artistry with everyday function — ideal for iftar gatherings and Ramadan hospitality.",
-    price: "24.99",
+    price: "18.99",
     currency: "$",
     modelPath: `${B}models/islamic/crescent-dates-pot.glb`,
     modelType: "glb",
@@ -225,7 +225,7 @@ export const islamicProducts = [
     name: "Dates Serving Bowl",
     description:
       "An elegantly crafted serving bowl designed specifically for presenting dates. A beautiful and practical addition to your iftar table or everyday hospitality.",
-    price: "19.99",
+    price: "16.99",
     currency: "$",
     modelPath: `${B}models/islamic/pot-dates-holder.glb`,
     modelType: "glb",
@@ -291,7 +291,7 @@ export const islamicProducts = [
     name: "La Ilaha Illa Allah Wall Art",
     description:
       "A 3D-printed wall art piece featuring the Shahada — 'La Ilaha Illa Allah' — in elegant Arabic calligraphy. A meaningful declaration of faith for your home.",
-    price: "24.99",
+    price: "19.99",
     currency: "$",
     modelPath: `${B}models/islamic/la-ilaha-illa-allah-wall-art.glb`,
     modelType: "glb",
@@ -352,7 +352,7 @@ export const islamicProducts = [
     name: "Eid Cash Gift Tube",
     description:
       "A tubular Eid gift enclosure where recipients can pull out cash. A creative and fun way to present money gifts during Eid celebrations.",
-    price: "12.99",
+    price: "5.99",
     currency: "$",
     modelPath: `${B}models/islamic/eid-cash-gift-tube.stl`,
     modelType: "stl",
@@ -370,7 +370,7 @@ export const islamicProducts = [
     name: "Hasbunallahu Wa Ni'mal Wakeel Wall Art",
     description:
       "A 3D-printed wall art piece featuring the powerful phrase 'Hasbunallahu wa ni'mal wakeel' (Allah is sufficient for us, and He is the best disposer of affairs) in elegant Arabic calligraphy.",
-    price: "22.99",
+    price: "16.99",
     currency: "$",
     modelPath: `${B}models/islamic/hasbunallah-wall-art.stl`,
     modelType: "stl",
@@ -388,7 +388,7 @@ export const islamicProducts = [
     name: "Miniature Hanging Lamp",
     description:
       "A delicate miniature lamp designed to hang with strings. A charming decorative piece that adds a warm, traditional touch to any room.",
-    price: "16.99",
+    price: "9.99",
     currency: "$",
     modelPath: `${B}models/islamic/miniature-hanging-lamp.stl`,
     modelType: "stl",
@@ -405,7 +405,7 @@ export const islamicProducts = [
     name: "Quran Prayer Holder",
     description:
       "A practical Quran holder designed for use during prayer. Place it in front of you while praying and fold it flat during sujood for uninterrupted recitation.",
-    price: "18.99",
+    price: "14.99",
     currency: "$",
     modelPath: `${B}models/islamic/quran-prayer-holder.stl`,
     modelType: "stl",
