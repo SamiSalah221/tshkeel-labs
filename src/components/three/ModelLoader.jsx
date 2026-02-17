@@ -5,6 +5,30 @@ import * as THREE from "three";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import DimensionsView from "./DimensionsView";
 
+/**
+ * Detect if a model is z-up by comparing scene bbox axes to real-world dimensions.
+ * Returns true if the z-axis holds the real-world height (dimensions.h) AND z is
+ * significantly larger than y in scene space.
+ */
+function detectZUp(bboxSize, dimensions) {
+  if (bboxSize.z <= bboxSize.y * 1.3) return false;
+
+  const dims = [dimensions.w, dimensions.h, dimensions.d];
+  const sizes = [bboxSize.x, bboxSize.y, bboxSize.z];
+  const perms = [[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
+  let bestPerm = perms[0], bestErr = Infinity;
+  for (const p of perms) {
+    const r0 = sizes[0] > 0 ? dims[p[0]] / sizes[0] : 0;
+    const r1 = sizes[1] > 0 ? dims[p[1]] / sizes[1] : 0;
+    const r2 = sizes[2] > 0 ? dims[p[2]] / sizes[2] : 0;
+    const avg = (r0 + r1 + r2) / 3;
+    const err = Math.abs(r0 - avg) + Math.abs(r1 - avg) + Math.abs(r2 - avg);
+    if (err < bestErr) { bestErr = err; bestPerm = p; }
+  }
+  // bestPerm[2] = which dims index maps to z-axis. Index 1 = height (dims.h).
+  return bestPerm[2] === 1;
+}
+
 function PlaceholderGeometry({ type, color, colorOverride }) {
   const matProps = { color: colorOverride || color || "#C9A84C", metalness: 0.8, roughness: 0.2 };
 
@@ -203,7 +227,7 @@ function PlaceholderGeometry({ type, color, colorOverride }) {
   }
 }
 
-function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, activeZone, showDimensions, dimensions }) {
+function GLBModel({ path, scale, rotation, zoneColors, onZonesDetected, zoneConfig, activeZone, showDimensions, dimensions }) {
   const { scene } = useGLTF(path);
   const whiteColor = useRef(new THREE.Color(1, 1, 1));
   const needsResetRef = useRef(false);
@@ -246,6 +270,7 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
         hex: "#" + z.rgb.map((v) => v.toString(16).padStart(2, "0")).join(""),
         count: 0,
         memberHexes: [],
+        ...(z.maxDist != null && { maxDist: z.maxDist }),
       }));
 
       // Collect unique mesh colors with their counts
@@ -281,24 +306,22 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
         }
       }
 
-      // Phase 2: Remaining unclaimed colors go to nearest zone
+      // Phase 2: Remaining unclaimed colors go to nearest zone (respecting maxDist)
       for (const uc of uniqueList) {
         if (claimed.has(uc.hex)) continue;
-        let closest = null;
-        let closestDist = Infinity;
-        for (const zone of configuredZones) {
-          const dist = Math.sqrt(
+        // Build sorted list of zones by distance
+        const ranked = configuredZones.map((zone) => ({
+          zone,
+          dist: Math.sqrt(
             (uc.r - zone.r) ** 2 + (uc.g - zone.g) ** 2 + (uc.b - zone.b) ** 2
-          );
-          if (dist < closestDist) {
-            closestDist = dist;
-            closest = zone;
-          }
-        }
-        if (closest) {
-          closest.count += uc.count;
-          if (!closest.memberHexes.includes(uc.hex)) {
-            closest.memberHexes.push(uc.hex);
+          ),
+        })).sort((a, b) => a.dist - b.dist);
+        // Pick the closest zone that allows this distance (respects maxDist if set)
+        const pick = ranked.find((r) => !r.zone.maxDist || r.dist <= r.zone.maxDist) || ranked[ranked.length - 1];
+        if (pick) {
+          pick.zone.count += uc.count;
+          if (!pick.zone.memberHexes.includes(uc.hex)) {
+            pick.zone.memberHexes.push(uc.hex);
           }
         }
       }
@@ -388,8 +411,16 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
     });
 
     meshDataRef.current = meshData;
+
+    // Wrap in rotated group if modelRotation is specified (e.g., z-up → y-up)
+    if (rotation) {
+      const wrapper = new THREE.Group();
+      wrapper.add(clone);
+      wrapper.rotation.set(rotation[0], rotation[1], rotation[2]);
+      return wrapper;
+    }
     return clone;
-  }, [scene, zoneColors, allZonesWithMembers, origHexToZoneHex]);
+  }, [scene, zoneColors, allZonesWithMembers, origHexToZoneHex, rotation]);
 
   // Animate: brighten active zone meshes toward white in a slow 1s pulse
   useFrame(({ clock }) => {
@@ -426,24 +457,55 @@ function GLBModel({ path, scale, zoneColors, onZonesDetected, zoneConfig, active
     });
   });
 
+  // Detect z-up models and compute correction for dimensions view
+  const dimensionsCorrection = useMemo(() => {
+    if (!showDimensions || !dimensions) return null;
+    coloredScene.updateWorldMatrix(true, true);
+    const rawBox = new THREE.Box3().setFromObject(coloredScene);
+    const rawSize = new THREE.Vector3();
+    rawBox.getSize(rawSize);
+    if (!detectZUp(rawSize, dimensions)) return null;
+    const rawCenter = new THREE.Vector3();
+    rawBox.getCenter(rawCenter);
+    return {
+      centerOffset: [-rawCenter.x, -rawCenter.y, -rawCenter.z],
+      rotation: [-Math.PI / 2, 0, 0],
+    };
+  }, [showDimensions, dimensions, coloredScene]);
+
   // Compute product bounding box for dimensions overlay
   const productBBox = useMemo(() => {
     if (!showDimensions || !dimensions || !coloredScene) return null;
-    const box = new THREE.Box3().setFromObject(coloredScene);
-    // Account for the scale applied to the primitive
-    const s = typeof scale === "number" ? scale : 1;
-    box.min.multiplyScalar(s);
-    box.max.multiplyScalar(s);
-    return box;
-  }, [showDimensions, dimensions, coloredScene, scale]);
+    coloredScene.updateWorldMatrix(true, true);
+    if (dimensionsCorrection) {
+      // After center + rotate -PI/2 around X: (x,y,z) -> (x,z,-y)
+      const rawBox = new THREE.Box3().setFromObject(coloredScene);
+      const rawSize = new THREE.Vector3();
+      rawBox.getSize(rawSize);
+      const hx = rawSize.x / 2, hy = rawSize.z / 2, hz = rawSize.y / 2;
+      return new THREE.Box3(
+        new THREE.Vector3(-hx, -hy, -hz),
+        new THREE.Vector3(hx, hy, hz)
+      );
+    }
+    return new THREE.Box3().setFromObject(coloredScene);
+  }, [showDimensions, dimensions, coloredScene, dimensionsCorrection]);
 
   return (
-    <>
-      <primitive object={coloredScene} scale={scale} />
+    <group scale={scale}>
+      {dimensionsCorrection ? (
+        <group rotation={dimensionsCorrection.rotation}>
+          <group position={dimensionsCorrection.centerOffset}>
+            <primitive object={coloredScene} />
+          </group>
+        </group>
+      ) : (
+        <primitive object={coloredScene} />
+      )}
       {showDimensions && productBBox && dimensions && (
         <DimensionsView productBBox={productBBox} productDimensions={dimensions} />
       )}
-    </>
+    </group>
   );
 }
 
@@ -466,20 +528,42 @@ function STLModel({ path, scale, color, colorOverride, rotation, showDimensions,
     return maxDim > 0 ? (targetSize / maxDim) * scale : scale;
   }, [geometry, scale]);
 
-  // Compute bounding box for dimensions overlay
+  // Detect z-up for dimensions correction (STL geometry is already centered)
+  const dimensionsCorrection = useMemo(() => {
+    if (!showDimensions || !dimensions) return null;
+    geometry.computeBoundingBox();
+    const rawSize = new THREE.Vector3();
+    geometry.boundingBox.getSize(rawSize);
+    if (!detectZUp(rawSize, dimensions)) return null;
+    return [-Math.PI / 2, 0, 0];
+  }, [showDimensions, dimensions, geometry]);
+
+  // Compute bounding box for dimensions overlay (rotation-aware)
   const productBBox = useMemo(() => {
     if (!showDimensions || !dimensions) return null;
     geometry.computeBoundingBox();
-    const box = geometry.boundingBox.clone();
-    const s = typeof normalizedScale === "number" ? normalizedScale : 1;
-    box.min.multiplyScalar(s);
-    box.max.multiplyScalar(s);
-    return box;
-  }, [showDimensions, dimensions, geometry, normalizedScale]);
+    const baseRot = rotation || [0, 0, 0];
+    const effectiveRot = dimensionsCorrection
+      ? [baseRot[0] + dimensionsCorrection[0], baseRot[1] + dimensionsCorrection[1], baseRot[2] + dimensionsCorrection[2]]
+      : baseRot;
+    if (effectiveRot[0] === 0 && effectiveRot[1] === 0 && effectiveRot[2] === 0) {
+      return geometry.boundingBox.clone();
+    }
+    const tempMesh = new THREE.Mesh(geometry);
+    tempMesh.rotation.set(effectiveRot[0], effectiveRot[1], effectiveRot[2]);
+    tempMesh.updateMatrixWorld(true);
+    return new THREE.Box3().setFromObject(tempMesh);
+  }, [showDimensions, dimensions, geometry, rotation, dimensionsCorrection]);
 
   return (
-    <>
-      <mesh ref={meshRef} geometry={geometry} scale={normalizedScale} rotation={rotation || [0, 0, 0]}>
+    <group scale={normalizedScale}>
+      <mesh ref={meshRef} geometry={geometry}
+        rotation={dimensionsCorrection
+          ? [(rotation?.[0] || 0) + dimensionsCorrection[0],
+             (rotation?.[1] || 0) + dimensionsCorrection[1],
+             (rotation?.[2] || 0) + dimensionsCorrection[2]]
+          : rotation || [0, 0, 0]}
+      >
         <meshStandardMaterial
           color={colorOverride || color || "#C9A84C"}
           metalness={0.1}
@@ -489,25 +573,27 @@ function STLModel({ path, scale, color, colorOverride, rotation, showDimensions,
       {showDimensions && productBBox && dimensions && (
         <DimensionsView productBBox={productBBox} productDimensions={dimensions} />
       )}
-    </>
+    </group>
   );
 }
 
 export default function ModelLoader({ product, colorOverride, zoneColors, onZonesDetected, activeZone, showDimensions }) {
   if (!product.modelPath) {
     return (
-      <PlaceholderGeometry
-        type={product.placeholderGeometry}
-        color={product.color}
-        colorOverride={colorOverride}
-      />
+      <group scale={product.scale}>
+        <PlaceholderGeometry
+          type={product.placeholderGeometry}
+          color={product.color}
+          colorOverride={colorOverride}
+        />
+      </group>
     );
   }
 
   switch (product.modelType) {
     case "glb":
     case "gltf":
-      return <GLBModel path={product.modelPath} scale={product.scale} zoneColors={zoneColors} onZonesDetected={onZonesDetected} zoneConfig={product.zoneConfig} activeZone={activeZone} showDimensions={showDimensions} dimensions={product.dimensions} />;
+      return <GLBModel path={product.modelPath} scale={product.scale} rotation={product.modelRotation} zoneColors={zoneColors} onZonesDetected={onZonesDetected} zoneConfig={product.zoneConfig} activeZone={activeZone} showDimensions={showDimensions} dimensions={product.dimensions} />;
     case "stl":
       return <STLModel path={product.modelPath} scale={product.scale} color={product.color} colorOverride={colorOverride} rotation={product.modelRotation} showDimensions={showDimensions} dimensions={product.dimensions} />;
     default:

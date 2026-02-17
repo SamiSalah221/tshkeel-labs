@@ -139,16 +139,14 @@ export default function ProductViewerModal({ product, onClose }) {
               <meshBasicMaterial color="#C9A84C" wireframe />
             </mesh>
           }>
-            <group scale={product.scale}>
-              <ModelLoader
-                product={product}
-                colorOverride={isGLB ? undefined : selectedColor}
-                zoneColors={isGLB ? zoneColors : undefined}
-                onZonesDetected={isGLB ? handleZonesDetected : undefined}
-                activeZone={isGLB ? activeZone : undefined}
-                showDimensions={showDimensions}
-              />
-            </group>
+            <ModelLoader
+              product={product}
+              colorOverride={isGLB ? undefined : selectedColor}
+              zoneColors={isGLB ? zoneColors : undefined}
+              onZonesDetected={isGLB ? handleZonesDetected : undefined}
+              activeZone={isGLB ? activeZone : undefined}
+              showDimensions={showDimensions}
+            />
           </Suspense>
           <OrbitControls
             enablePan={true}

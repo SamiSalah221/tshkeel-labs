@@ -241,6 +241,8 @@ textarea:focus-visible,
 
 /* ── Dark immersive panel (Contact, CustomCTA, Testimonials) ── */
 .dark-panel {
+  position: relative;
+  z-index: 1;
   background: linear-gradient(
     135deg,
     color-mix(in srgb, var(--color-bg-dark) 93%, transparent) 0%,
