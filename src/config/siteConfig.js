@@ -8,7 +8,7 @@ export const siteConfig = {
     "A maker, Muslim, and ASU student based in Tempe, AZ. What started as a hobby in 3D printing became a mission: to bring beautifully crafted, faith-inspired pieces into Muslim homes. Every piece is designed and printed with care, right here in Arizona.",
   mission:
     "At Tshkeel Labs, we believe that faith and innovation go hand in hand. Every piece we create is designed to inspire, remind, and beautify your space with the essence of Islam.",
-  instagramUrl: "https://instagram.com/tshkeellabs",
+  instagramUrl: "https://www.instagram.com/tshkeellabs/",
 
   // Prayer times (ICS calendar feed)
   prayerTimesIcsUrl:
