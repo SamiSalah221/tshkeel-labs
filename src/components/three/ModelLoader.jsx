@@ -413,15 +413,8 @@ function GLBModel({ path, scale, rotation, zoneColors, onZonesDetected, zoneConf
 
     meshDataRef.current = meshData;
 
-    // Wrap in rotated group if modelRotation is specified (e.g., z-up → y-up)
-    if (rotation) {
-      const wrapper = new THREE.Group();
-      wrapper.add(clone);
-      wrapper.rotation.set(rotation[0], rotation[1], rotation[2]);
-      return wrapper;
-    }
     return clone;
-  }, [scene, zoneColors, allZonesWithMembers, origHexToZoneHex, rotation]);
+  }, [scene, zoneColors, allZonesWithMembers, origHexToZoneHex]);
 
   // Animate: brighten active zone meshes toward white in a slow 1s pulse
   useFrame(({ clock }) => {
@@ -458,7 +451,9 @@ function GLBModel({ path, scale, rotation, zoneColors, onZonesDetected, zoneConf
     });
   });
 
-  // Detect z-up models and compute correction for dimensions view
+  // Detect Z-up models and compute correction for dimensions view.
+  // Only handles Z-up → Y-up conversion (-PI/2 on X). Models with modelRotation
+  // (like Kaaba) use their rotation directly in the JSX render path instead.
   const dimensionsCorrection = useMemo(() => {
     if (!showDimensions || !dimensions) return null;
     coloredScene.updateWorldMatrix(true, true);
@@ -479,15 +474,19 @@ function GLBModel({ path, scale, rotation, zoneColors, onZonesDetected, zoneConf
     if (!showDimensions || !dimensions || !coloredScene) return null;
     coloredScene.updateWorldMatrix(true, true);
     if (dimensionsCorrection) {
-      // After center + rotate -PI/2 around X: (x,y,z) -> (x,z,-y)
-      const rawBox = new THREE.Box3().setFromObject(coloredScene);
-      const rawSize = new THREE.Vector3();
-      rawBox.getSize(rawSize);
-      const hx = rawSize.x / 2, hy = rawSize.z / 2, hz = rawSize.y / 2;
-      return new THREE.Box3(
-        new THREE.Vector3(-hx, -hy, -hz),
-        new THREE.Vector3(hx, hy, hz)
-      );
+      // Simulate the centering + rotation to compute the AABB
+      const tempGroup = new THREE.Group();
+      const sceneClone = coloredScene.clone();
+      const innerGroup = new THREE.Group();
+      innerGroup.position.set(...dimensionsCorrection.centerOffset);
+      innerGroup.add(sceneClone);
+      tempGroup.rotation.set(...dimensionsCorrection.rotation);
+      tempGroup.add(innerGroup);
+      tempGroup.updateWorldMatrix(true, true);
+      const rotatedBox = new THREE.Box3().setFromObject(tempGroup);
+      tempGroup.remove(innerGroup);
+      innerGroup.remove(sceneClone);
+      return rotatedBox;
     }
     return new THREE.Box3().setFromObject(coloredScene);
   }, [showDimensions, dimensions, coloredScene, dimensionsCorrection]);
@@ -523,11 +522,25 @@ function GLBModel({ path, scale, rotation, zoneColors, onZonesDetected, zoneConf
             <primitive object={coloredScene} />
           </group>
         </group>
+      ) : showDimensions && rotation ? (
+        <group rotation={rotation}>
+          <primitive object={coloredScene} />
+        </group>
+      ) : showDimensions ? (
+        <primitive object={coloredScene} />
+      ) : rotation ? (
+        <group rotation={rotation}>
+          <primitive object={coloredScene} />
+        </group>
       ) : (
         <primitive object={coloredScene} />
       )}
       {showDimensions && productBBox && dimensions && (
-        <DimensionsView productBBox={productBBox} productDimensions={dimensions} heightSplit={heightSplit} />
+        <DimensionsView
+          productBBox={productBBox}
+          productDimensions={dimensions}
+          heightSplit={heightSplit}
+        />
       )}
     </group>
   );

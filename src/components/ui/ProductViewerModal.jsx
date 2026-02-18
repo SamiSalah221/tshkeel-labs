@@ -1,4 +1,4 @@
-import { Suspense, useState, useEffect, useContext, useCallback, useMemo } from "react";
+import { Suspense, useState, useEffect, useRef, useContext, useCallback, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment } from "@react-three/drei";
 import { ThemeContext } from "../../contexts/ThemeContext";
@@ -16,6 +16,14 @@ export default function ProductViewerModal({ product, onClose }) {
   const [autoRotate, setAutoRotate] = useState(true);
   // Dimensions view toggle
   const [showDimensions, setShowDimensions] = useState(false);
+  const controlsRef = useRef();
+
+  // Reset camera to front-on when entering dimensions mode
+  useEffect(() => {
+    if (showDimensions && controlsRef.current) {
+      controlsRef.current.reset();
+    }
+  }, [showDimensions]);
 
   const isGLB = product?.modelType === "glb" || product?.modelType === "gltf";
 
@@ -149,12 +157,13 @@ export default function ProductViewerModal({ product, onClose }) {
             />
           </Suspense>
           <OrbitControls
+            ref={controlsRef}
             enablePan={true}
             enableZoom={true}
             enableRotate={true}
             minDistance={1}
             maxDistance={10}
-            autoRotate={autoRotate}
+            autoRotate={autoRotate && !showDimensions}
             autoRotateSpeed={2}
           />
         </Canvas>

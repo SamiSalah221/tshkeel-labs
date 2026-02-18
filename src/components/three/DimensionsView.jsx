@@ -71,8 +71,7 @@ export default function DimensionsView({ productBBox, productDimensions, heightS
       const avg = (r0 + r1 + r2) / 3;
       const err = Math.abs(r0 - avg) + Math.abs(r1 - avg) + Math.abs(r2 - avg);
 
-      // Tiebreaker: penalize when dimension size ordering doesn't match axis ordering
-      // e.g. if dim A > dim B but axis A < axis B, that's likely a wrong mapping
+      // Tiebreaker 1: penalize when dimension size ordering doesn't match axis ordering
       let orderPenalty = 0;
       for (let i = 0; i < 3; i++) {
         for (let j = i + 1; j < 3; j++) {
@@ -84,8 +83,22 @@ export default function DimensionsView({ productBBox, productDimensions, heightS
         }
       }
 
-      const score = err + orderPenalty;
+      // Tiebreaker 2: when axes are equal (sizeDiff=0), prefer identity mapping
+      // w→x, h→y, d→z — small enough to never override a genuine best match
+      let identityPenalty = 0;
+      for (let i = 0; i < 3; i++) {
+        if (p[i] !== i) identityPenalty += 0.0001;
+      }
+
+      const score = err + orderPenalty + identityPenalty;
       if (score < bestScore) { bestScore = score; bestPerm = p; }
+    }
+    // When heightSplit is provided (keychain products), force identity mapping.
+    // Keychains are always modeled with w→X, h→Y, d→Z convention.
+    // The permutation algorithm can fail for models with 3D relief (like Kaaba)
+    // where the Z-axis extent doesn't match the physical depth dimension.
+    if (heightSplit) {
+      bestPerm = [0, 1, 2];
     }
     // mm labels for each scene axis
     const xMM = dims[bestPerm[0]];
