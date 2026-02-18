@@ -1,9 +1,9 @@
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useState, useRef, useCallback } from "react";
 import { siteConfig } from "../../config/siteConfig";
+import { IS_TOUCH, IS_IOS } from "../../utils/platform";
 import ProductIllustration from "./ProductIllustration";
 
 export default function ProductCard({ product, onViewIn3D }) {
-  const isTouchDevice = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches, []);
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0, glareX: 50, glareY: 50 });
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef(null);
@@ -35,17 +35,21 @@ export default function ProductCard({ product, onViewIn3D }) {
   return (
     <article
       ref={cardRef}
-      onMouseMove={isTouchDevice ? undefined : handleMouseMove}
+      onMouseMove={IS_TOUCH ? undefined : handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => { handleMouseLeave(); setIsHovered(false); }}
       className="bg-bg-card/85 backdrop-blur-md border border-accent/25 rounded-2xl shadow-lg shadow-black/10 product-card-hover"
       style={{
         display: "flex",
         flexDirection: "column",
-        transform: `perspective(800px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) translateY(${isHovered ? -6 : 0}px)`,
-        transition: tilt.rotateX === 0 && tilt.rotateY === 0 ? "transform 0.5s ease, box-shadow 0.3s ease" : "box-shadow 0.3s ease",
-        willChange: "transform",
-        transformStyle: "preserve-3d",
+        transform: IS_TOUCH
+          ? undefined
+          : `perspective(800px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) translateY(${isHovered ? -6 : 0}px)`,
+        transition: IS_TOUCH
+          ? "box-shadow 0.3s ease"
+          : tilt.rotateX === 0 && tilt.rotateY === 0 ? "transform 0.5s ease, box-shadow 0.3s ease" : "box-shadow 0.3s ease",
+        willChange: IS_TOUCH ? undefined : "transform",
+        transformStyle: IS_TOUCH ? undefined : "preserve-3d",
         position: "relative",
         overflow: "hidden",
         borderTop: `${product.featured ? 4 : 3}px solid ${product.color}`,
@@ -104,7 +108,7 @@ export default function ProductCard({ product, onViewIn3D }) {
           <img
             src={product.image}
             alt={product.name}
-            loading="lazy"
+            loading={IS_IOS ? "eager" : "lazy"}
             style={{
               width: "100%",
               height: "100%",

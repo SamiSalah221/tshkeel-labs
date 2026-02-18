@@ -4,7 +4,9 @@ import FloatingModels from "./FloatingModels";
 
 const IS_MOBILE = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
 
-export default function Scene({ themeScene }) {
+export default function Scene({ themeScene, showScene = true }) {
+  if (!showScene) return <Lighting lightColors={themeScene.lightColors} />;
+
   return (
     <>
       <Lighting lightColors={themeScene.lightColors} />

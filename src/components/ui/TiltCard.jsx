@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { IS_TOUCH } from "../../utils/platform";
 
 export default function TiltCard({ children, className, style }) {
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0, glareX: 50, glareY: 50 });
@@ -21,6 +22,15 @@ export default function TiltCard({ children, className, style }) {
   const handleMouseLeave = useCallback(() => {
     setTilt({ rotateX: 0, rotateY: 0, glareX: 50, glareY: 50 });
   }, []);
+
+  // On touch devices, skip tilt transforms — just render a plain wrapper
+  if (IS_TOUCH) {
+    return (
+      <div className={className} style={{ ...style, position: "relative", overflow: "hidden" }}>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div

@@ -4,6 +4,7 @@ import { ScrollControls, Scroll } from "@react-three/drei";
 import { siteConfig } from "./config/siteConfig";
 import { ScrollContext } from "./contexts/ScrollContext";
 import { ThemeProvider, ThemeContext } from "./contexts/ThemeContext";
+import { IS_IOS } from "./utils/platform";
 import Scene from "./components/three/Scene";
 import ScrollBridge from "./components/three/ScrollBridge";
 import Navbar from "./components/ui/Navbar";
@@ -141,21 +142,23 @@ function AppContent() {
         <Suspense fallback={<LoadingScreen />}>
           <Canvas
             camera={{ position: [0, 0, 6], fov: 50 }}
-            dpr={isMobile ? [1, 1.5] : [1, 2]}
+            dpr={IS_IOS ? [1, 1] : isMobile ? [1, 1.5] : [1, 2]}
             gl={{ antialias: !isMobile, powerPreference: "high-performance" }}
           >
             <color attach="background" args={[theme.scene.canvasBackground]} />
             <ScrollControls pages={pages} damping={0.25}>
               <ScrollBridge setScrollToSection={setScrollToSection} setActiveSection={handleActiveSection} />
               <Scroll>
-                <Scene themeScene={theme.scene} />
+                <Scene themeScene={theme.scene} showScene={!isMobile || mobileView !== "products"} />
               </Scroll>
               <Scroll html style={{ width: "100%" }}>
                 <main ref={setContentEl} id="main-content" style={{ position: 'relative' }}>
-                  <div
-                    className={theme.bgPatternClass}
-                    style={{ height: '100%', position: 'absolute' }}
-                  />
+                  {(!isMobile || mobileView !== "products") && (
+                    <div
+                      className={theme.bgPatternClass}
+                      style={{ height: '100%', position: 'absolute' }}
+                    />
+                  )}
                   {/* Desktop: render all sections. Mobile: conditional on mobileView */}
                   {(!isMobile || mobileView === "home") && (
                     <>

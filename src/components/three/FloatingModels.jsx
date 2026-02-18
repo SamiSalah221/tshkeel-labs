@@ -3,9 +3,10 @@ import * as THREE from "three";
 import { useFrame, useThree, useLoader } from "@react-three/fiber";
 import { useScroll, useGLTF } from "@react-three/drei";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
+import { IS_MOBILE, IS_IOS } from "../../utils/platform";
 
-// Cache mobile detection once at module level (avoid checking every frame)
-const IS_MOBILE = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
+// iOS skips 2 out of 3 frames; other mobile skips every other frame
+const FRAME_SKIP = IS_IOS ? 3 : IS_MOBILE ? 2 : 1;
 
 // Error boundary to gracefully handle GLB load failures
 class GLBErrorBoundary extends Component {
@@ -85,7 +86,7 @@ function FloatingModel({ geometryType, color, position, scale, index, scrollRef,
 
     // Frame throttling on mobile — skip every other frame
     frameCount.current++;
-    if (IS_MOBILE && frameCount.current % 2 !== 0) return;
+    if (FRAME_SKIP > 1 && frameCount.current % FRAME_SKIP !== 0) return;
 
     const t = state.clock.elapsedTime;
     const pointer = state.pointer;
@@ -162,7 +163,7 @@ function FloatingGLBModel({ modelPath, position, scale, index, scrollRef, viewpo
 
     // Frame throttling on mobile
     frameCount.current++;
-    if (IS_MOBILE && frameCount.current % 2 !== 0) return;
+    if (FRAME_SKIP > 1 && frameCount.current % FRAME_SKIP !== 0) return;
 
     const t = state.clock.elapsedTime;
     const pointer = state.pointer;
@@ -220,7 +221,7 @@ function FloatingSTLModel({ modelPath, position, scale, index, scrollRef, viewpo
 
     // Frame throttling on mobile
     frameCount.current++;
-    if (IS_MOBILE && frameCount.current % 2 !== 0) return;
+    if (FRAME_SKIP > 1 && frameCount.current % FRAME_SKIP !== 0) return;
 
     const t = state.clock.elapsedTime;
     const pointer = state.pointer;
