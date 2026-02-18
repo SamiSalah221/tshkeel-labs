@@ -228,7 +228,7 @@ function PlaceholderGeometry({ type, color, colorOverride }) {
   }
 }
 
-function GLBModel({ path, scale, rotation, zoneColors, onZonesDetected, zoneConfig, activeZone, showDimensions, dimensions }) {
+function GLBModel({ path, scale, rotation, zoneColors, onZonesDetected, zoneConfig, activeZone, showDimensions, dimensions, heightSplit }) {
   const { scene } = useGLTF(path);
   const whiteColor = useRef(new THREE.Color(1, 1, 1));
   const needsResetRef = useRef(false);
@@ -527,13 +527,13 @@ function GLBModel({ path, scale, rotation, zoneColors, onZonesDetected, zoneConf
         <primitive object={coloredScene} />
       )}
       {showDimensions && productBBox && dimensions && (
-        <DimensionsView productBBox={productBBox} productDimensions={dimensions} />
+        <DimensionsView productBBox={productBBox} productDimensions={dimensions} heightSplit={heightSplit} />
       )}
     </group>
   );
 }
 
-function STLModel({ path, scale, color, colorOverride, rotation, showDimensions, dimensions }) {
+function STLModel({ path, scale, color, colorOverride, rotation, showDimensions, dimensions, heightSplit }) {
   const geometry = useLoader(STLLoader, path);
   const meshRef = useRef();
 
@@ -617,7 +617,7 @@ function STLModel({ path, scale, color, colorOverride, rotation, showDimensions,
         />
       </mesh>
       {showDimensions && productBBox && dimensions && (
-        <DimensionsView productBBox={productBBox} productDimensions={dimensions} />
+        <DimensionsView productBBox={productBBox} productDimensions={dimensions} heightSplit={heightSplit} />
       )}
     </group>
   );
@@ -639,9 +639,9 @@ export default function ModelLoader({ product, colorOverride, zoneColors, onZone
   switch (product.modelType) {
     case "glb":
     case "gltf":
-      return <GLBModel path={product.modelPath} scale={product.scale} rotation={product.modelRotation} zoneColors={zoneColors} onZonesDetected={onZonesDetected} zoneConfig={product.zoneConfig} activeZone={activeZone} showDimensions={showDimensions} dimensions={product.dimensions} />;
+      return <GLBModel path={product.modelPath} scale={product.scale} rotation={product.modelRotation} zoneColors={zoneColors} onZonesDetected={onZonesDetected} zoneConfig={product.zoneConfig} activeZone={activeZone} showDimensions={showDimensions} dimensions={product.dimensions} heightSplit={product.heightSplit} />;
     case "stl":
-      return <STLModel path={product.modelPath} scale={product.scale} color={product.color} colorOverride={colorOverride} rotation={product.modelRotation} showDimensions={showDimensions} dimensions={product.dimensions} />;
+      return <STLModel path={product.modelPath} scale={product.scale} color={product.color} colorOverride={colorOverride} rotation={product.modelRotation} showDimensions={showDimensions} dimensions={product.dimensions} heightSplit={product.heightSplit} />;
     default:
       return (
         <PlaceholderGeometry
