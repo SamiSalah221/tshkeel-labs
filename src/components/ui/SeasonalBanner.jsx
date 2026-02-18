@@ -25,7 +25,7 @@ function getSeasonalMessage(hijri) {
     }
   }
   if (hijri.month === 9) {
-    return "Ramadan Mubarak! Special Eid pieces available.";
+    return "Ramadan Mubarak! New Eid Collection Dropping Soon — Be the first to order!";
   }
   // Eid al-Adha is month 12 day 10
   if (hijri.month === 11 || (hijri.month === 12 && hijri.day < 10)) {
