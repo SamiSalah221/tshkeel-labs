@@ -4,6 +4,7 @@ import { useMemo, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import DimensionsView from "./DimensionsView";
+import { IPHONE_DIMENSIONS } from "../../config/products";
 
 /**
  * Detect if a model is z-up by comparing scene bbox axes to real-world dimensions.
@@ -491,8 +492,31 @@ function GLBModel({ path, scale, rotation, zoneColors, onZonesDetected, zoneConf
     return new THREE.Box3().setFromObject(coloredScene);
   }, [showDimensions, dimensions, coloredScene, dimensionsCorrection]);
 
+  // When dimensions are shown, scale the entire group so product + iPhone
+  // at correct proportional sizes fits within the camera viewport
+  const comparisonScale = useMemo(() => {
+    if (!showDimensions || !dimensions || !productBBox) return scale;
+    const pSize = new THREE.Vector3();
+    productBBox.getSize(pSize);
+    const sceneMaxDim = Math.max(pSize.x, pSize.y, pSize.z);
+    const realMaxDim = Math.max(dimensions.w, dimensions.h, dimensions.d);
+    const unitsPerMm = sceneMaxDim / realMaxDim;
+
+    const iphoneMaxReal = Math.max(IPHONE_DIMENSIONS.w, IPHONE_DIMENSIONS.h, IPHONE_DIMENSIONS.d);
+    const iphoneHeight = iphoneMaxReal * unitsPerMm;
+    const iphoneWidth = IPHONE_DIMENSIONS.w * unitsPerMm;
+
+    const gap = pSize.x * 0.2;
+    const totalWidth = pSize.x + gap + iphoneWidth;
+    const totalHeight = Math.max(pSize.y, iphoneHeight);
+    const totalExtent = Math.max(totalWidth, totalHeight);
+
+    const fitTarget = 3.0;
+    return totalExtent > 0 ? fitTarget / totalExtent : scale;
+  }, [showDimensions, dimensions, productBBox, scale]);
+
   return (
-    <group scale={scale}>
+    <group scale={showDimensions && productBBox ? comparisonScale : scale}>
       {dimensionsCorrection ? (
         <group rotation={dimensionsCorrection.rotation}>
           <group position={dimensionsCorrection.centerOffset}>
@@ -555,8 +579,30 @@ function STLModel({ path, scale, color, colorOverride, rotation, showDimensions,
     return new THREE.Box3().setFromObject(tempMesh);
   }, [showDimensions, dimensions, geometry, rotation, dimensionsCorrection]);
 
+  // Scale entire comparison scene to fit viewport while preserving proportions
+  const comparisonScale = useMemo(() => {
+    if (!showDimensions || !dimensions || !productBBox) return normalizedScale;
+    const pSize = new THREE.Vector3();
+    productBBox.getSize(pSize);
+    const sceneMaxDim = Math.max(pSize.x, pSize.y, pSize.z);
+    const realMaxDim = Math.max(dimensions.w, dimensions.h, dimensions.d);
+    const unitsPerMm = sceneMaxDim / realMaxDim;
+
+    const iphoneMaxReal = Math.max(IPHONE_DIMENSIONS.w, IPHONE_DIMENSIONS.h, IPHONE_DIMENSIONS.d);
+    const iphoneHeight = iphoneMaxReal * unitsPerMm;
+    const iphoneWidth = IPHONE_DIMENSIONS.w * unitsPerMm;
+
+    const gap = pSize.x * 0.2;
+    const totalWidth = pSize.x + gap + iphoneWidth;
+    const totalHeight = Math.max(pSize.y, iphoneHeight);
+    const totalExtent = Math.max(totalWidth, totalHeight);
+
+    const fitTarget = 3.0;
+    return totalExtent > 0 ? fitTarget / totalExtent : normalizedScale;
+  }, [showDimensions, dimensions, productBBox, normalizedScale]);
+
   return (
-    <group scale={normalizedScale}>
+    <group scale={showDimensions && productBBox ? comparisonScale : normalizedScale}>
       <mesh ref={meshRef} geometry={geometry}
         rotation={dimensionsCorrection
           ? [(rotation?.[0] || 0) + dimensionsCorrection[0],

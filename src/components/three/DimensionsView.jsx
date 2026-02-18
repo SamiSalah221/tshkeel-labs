@@ -41,7 +41,7 @@ export default function DimensionsView({ productBBox, productDimensions }) {
 
   // ── useMemo #2: All layout computation ──
   const {
-    center, iphoneScaleFactor, iphonePos, iphoneCapped, scaledIphoneTallDim,
+    center, iphoneScaleFactor, iphonePos, scaledIphoneTallDim,
     tickLen, lineOffset, labelOffset,
     left, right, bottom, top, back, front,
     xMM, yMM, zMM,
@@ -85,19 +85,11 @@ export default function DimensionsView({ productBBox, productDimensions }) {
     const iphoneMaxReal = Math.max(IPHONE_DIMENSIONS.w, IPHONE_DIMENSIONS.h, IPHONE_DIMENSIONS.d);
     let iphoneTargetSize = iphoneMaxReal * unitsPerMm;
 
-    // Cap iPhone to prevent overflow (camera z=4, fov=50 → visible height ≈ 3.73 units)
-    let iphoneCapped = false;
-    const cap = Math.min(3.0, Math.max(sceneMaxDim * 0.8, 1.5));
-    if (iphoneTargetSize > cap) {
-      iphoneTargetSize = cap;
-      iphoneCapped = true;
-    }
-
     const iphoneScaleFactor = iphoneTargetSize / iphoneMaxScene;
 
     // iPhone positioning — to the right of the ACTUAL product edge
     const scaledIphoneWidth = iphoneBBoxSize.x * iphoneScaleFactor;
-    const gap = Math.min(pSize.x * 0.25, 0.5);
+    const gap = pSize.x * 0.2;
     const iphonePos = [
       center.x + pSize.x / 2 + gap + scaledIphoneWidth / 2,
       center.y,
@@ -122,7 +114,7 @@ export default function DimensionsView({ productBBox, productDimensions }) {
     const front  = center.z + pSize.z / 2;
 
     return {
-      center, iphoneScaleFactor, iphonePos, iphoneCapped, scaledIphoneTallDim,
+      center, iphoneScaleFactor, iphonePos, scaledIphoneTallDim,
       tickLen, lineOffset, labelOffset,
       left, right, bottom, top, back, front,
       xMM, yMM, zMM,
@@ -147,7 +139,7 @@ export default function DimensionsView({ productBBox, productDimensions }) {
         style={{ pointerEvents: "none" }}
       >
         <div style={{ color: "#555", fontSize: 11, whiteSpace: "nowrap", fontWeight: 500 }}>
-          iPhone 17{iphoneCapped ? " (not to scale)" : ""}
+          iPhone 17
         </div>
       </Html>
 

@@ -132,7 +132,7 @@ export const islamicProducts = [
     placeholderGeometry: "icosahedron",
     color: "#C9A84C",
     scale: 1.3,
-    dimensions: { w: 85.03, h: 140.16, d: 83.67 },
+    dimensions: { w: 105.16, h: 200.6, d: 103.47 },
     category: "Decor",
     colorOptions: FILAMENT_COLORS,
     zoneConfig: "single",
