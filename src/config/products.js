@@ -68,7 +68,7 @@ export const islamicProducts = [
     name: "Mosque Miniature",
     description:
       "A detailed miniature mosque model. A stunning centerpiece for your home or office that captures the beauty of Islamic architecture.",
-    price: "19.99",
+    price: "14.99",
     currency: "$",
     modelPath: `${B}models/islamic/miniature-al-aqsa-mosque.glb`,
     modelType: "glb",
@@ -144,7 +144,7 @@ export const islamicProducts = [
     name: "Bismillah Crescent Desk Piece",
     description:
       "A beautifully crafted crescent moon with Bismillah calligraphy in raised relief, resting on an elegant base. A meaningful accent piece for your desk or prayer space.",
-    price: "24.99",
+    price: "26.99",
     currency: "$",
     modelPath: `${B}models/islamic/crescent-bismillah.glb`,
     modelType: "glb",
@@ -165,7 +165,7 @@ export const islamicProducts = [
     name: "Crescent Ramadan Centerpiece",
     description:
       "A decorative crescent moon piece with intricate Ramadan-inspired details on an elegant base. Perfect as a table centerpiece during the holy month or year-round display.",
-    price: "24.99",
+    price: "26.99",
     currency: "$",
     modelPath: `${B}models/islamic/crescent-ramadan.glb`,
     modelType: "glb",
@@ -204,7 +204,7 @@ export const islamicProducts = [
     name: "Crescent Dates Pot",
     description:
       "A crescent moon-shaped pot designed to hold and serve dates. Combines Islamic artistry with everyday function — ideal for iftar gatherings and Ramadan hospitality.",
-    price: "18.99",
+    price: "23.99",
     currency: "$",
     modelPath: `${B}models/islamic/crescent-dates-pot.glb`,
     modelType: "glb",
@@ -225,7 +225,7 @@ export const islamicProducts = [
     name: "Dates Serving Bowl",
     description:
       "An elegantly crafted serving bowl designed specifically for presenting dates. A beautiful and practical addition to your iftar table or everyday hospitality.",
-    price: "16.99",
+    price: "19.99",
     currency: "$",
     modelPath: `${B}models/islamic/pot-dates-holder.glb`,
     modelType: "glb",
@@ -247,7 +247,7 @@ export const islamicProducts = [
     name: "Ramadan Stand",
     description:
       "A decorative Ramadan-themed display stand, perfect for showcasing dates, sweets, or small lanterns during the holy month.",
-    price: "24.99",
+    price: "32.99",
     currency: "$",
     modelPath: `${B}models/islamic/ramadan-stand.glb`,
     modelType: "glb",
@@ -264,13 +264,14 @@ export const islamicProducts = [
     ],
     image: `${B}images/products/islamic/ramadan stand.png`,
     viewerNote: "This product is single-sided only (not double-sided).",
+    badge: "Top Seller",
   },
   {
     id: 43,
     name: "Ramadan Crescent with Floats",
     description:
       "A beautifully designed crescent with suspended floating accents. A unique Ramadan decoration that adds a modern touch to traditional Islamic aesthetics.",
-    price: "24.99",
+    price: "29.99",
     currency: "$",
     modelPath: `${B}models/islamic/ramadan-crescent-with-floats.glb`,
     modelType: "glb",
@@ -286,6 +287,7 @@ export const islamicProducts = [
       { name: "White", rgb: [100, 102, 112], editable: true },
     ],
     image: `${B}images/products/islamic/Ramadan Crescent with Floats.png`,
+    badge: "Top Seller",
   },
   {
     id: 44,
@@ -313,7 +315,7 @@ export const islamicProducts = [
     name: "Alhamdulillah Wall Art",
     description:
       "A beautifully crafted 3D-printed wall piece featuring 'Alhamdulillah' in raised Arabic calligraphy. A daily reminder of gratitude for your living space.",
-    price: "24.99",
+    price: "49.99",
     currency: "$",
     modelPath: `${B}models/islamic/alhamdulillah-wall-art.glb`,
     modelType: "glb",
@@ -331,7 +333,7 @@ export const islamicProducts = [
     name: "Hijri Calendar Display",
     description:
       "A 3D-printed Hijri calendar display piece. Keep track of the Islamic calendar dates with this functional and decorative piece for your desk or shelf.",
-    price: "22.99",
+    price: "24.99",
     currency: "$",
     modelPath: `${B}models/islamic/hijri-calendar.glb`,
     modelType: "glb",
@@ -371,7 +373,7 @@ export const islamicProducts = [
     name: "Hasbunallahu Wa Ni'mal Wakeel Wall Art",
     description:
       "A 3D-printed wall art piece featuring the powerful phrase 'Hasbunallahu wa ni'mal wakeel' (Allah is sufficient for us, and He is the best disposer of affairs) in elegant Arabic calligraphy.",
-    price: "16.99",
+    price: "18.99",
     currency: "$",
     modelPath: `${B}models/islamic/hasbunallah-wall-art.stl`,
     modelType: "stl",
@@ -389,7 +391,7 @@ export const islamicProducts = [
     name: "Miniature Hanging Lamp",
     description:
       "A delicate miniature lamp designed to hang with strings. A charming decorative piece that adds a warm, traditional touch to any room.",
-    price: "9.99",
+    price: "5.99",
     currency: "$",
     modelPath: `${B}models/islamic/miniature-hanging-lamp.stl`,
     modelType: "stl",
@@ -406,7 +408,7 @@ export const islamicProducts = [
     name: "Quran Prayer Holder",
     description:
       "A practical Quran holder designed for use during prayer. Place it in front of you while praying and fold it flat during sujood for uninterrupted recitation.",
-    price: "14.99",
+    price: "21.99",
     currency: "$",
     modelPath: `${B}models/islamic/quran-prayer-holder.stl`,
     modelType: "stl",

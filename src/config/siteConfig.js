@@ -5,7 +5,7 @@ export const siteConfig = {
   whatsappMessage: "Assalamu Alaikum! I'm interested in ordering from Tshkeel Labs.",
   founderName: "Sami Salah",
   founderBio:
-    "A maker, Muslim, and ASU student based in Tempe, AZ. What started as a hobby in 3D printing became a mission: to bring beautifully crafted, faith-inspired pieces into Muslim homes. Every piece is designed and printed with care, right here in Arizona.",
+    "An engineer, Muslim, and ASU student based in Tempe, AZ. What started as a hobby in 3D printing became a mission: to bring beautifully crafted, faith-inspired pieces into Muslim homes. Every piece is designed and printed with care, right here in Arizona.",
   mission:
     "At Tshkeel Labs, we believe that faith and innovation go hand in hand. Every piece we create is designed to inspire, remind, and beautify your space with the essence of Islam.",
   instagramUrl: "https://www.instagram.com/tshkeellabs/",

@@ -52,10 +52,10 @@ export default function ProductCard({ product, onViewIn3D }) {
         transformStyle: IS_TOUCH ? undefined : "preserve-3d",
         position: "relative",
         overflow: "hidden",
-        borderTop: `${product.featured ? 4 : 3}px solid ${product.color}`,
+        borderTop: `${product.featured || product.badge ? 4 : 3}px solid ${product.color}`,
         boxShadow: isHovered
           ? `0 20px 40px rgba(0,0,0,0.15), 0 0 20px ${product.color}20`
-          : product.featured
+          : product.featured || product.badge
           ? `0 4px 16px rgba(0,0,0,0.1), 0 0 16px ${product.color}15`
           : undefined,
       }}
@@ -71,8 +71,8 @@ export default function ProductCard({ product, onViewIn3D }) {
         }}
       />
 
-      {/* Featured badge */}
-      {product.featured && (
+      {/* Badge (Top Seller / Featured) */}
+      {(product.badge || product.featured) && (
         <div
           style={{
             position: "absolute",
@@ -90,7 +90,7 @@ export default function ProductCard({ product, onViewIn3D }) {
             zIndex: 10,
           }}
         >
-          Featured
+          {product.badge || "Featured"}
         </div>
       )}
 

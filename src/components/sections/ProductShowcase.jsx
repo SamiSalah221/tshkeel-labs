@@ -21,7 +21,11 @@ export default function ProductShowcase({
 
   const products = useMemo(() => {
     const items = productsByCategory["islamic"] || [];
-    const sorted = [...items].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+    const sorted = [...items].sort((a, b) => {
+      const ap = a.badge ? 2 : a.featured ? 1 : 0;
+      const bp = b.badge ? 2 : b.featured ? 1 : 0;
+      return bp - ap;
+    });
     if (sortBy === "low-high") return sorted.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
     if (sortBy === "high-low") return sorted.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
     return sorted;
