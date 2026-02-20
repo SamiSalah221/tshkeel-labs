@@ -1,13 +1,5 @@
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { getARSupport, getAbsoluteModelURL } from "../../utils/arHelpers";
-
-// Lazy-load model-viewer web component (only on first AR button mount)
-let mvLoaded = false;
-function ensureModelViewer() {
-  if (mvLoaded) return Promise.resolve();
-  mvLoaded = true;
-  return import("@google/model-viewer");
-}
 
 // 3D cube icon (AR symbol)
 function ARIcon({ className }) {
@@ -18,68 +10,81 @@ function ARIcon({ className }) {
   );
 }
 
+/**
+ * Launch AR on Android via Scene Viewer intent URL.
+ * No model-viewer dependency — opens directly in Google's AR viewer.
+ */
+function launchAndroidAR(modelUrl, productName) {
+  const params = new URLSearchParams({
+    file: modelUrl,
+    mode: "ar_preferred",
+    title: productName,
+  });
+  const intentUrl =
+    `intent://arvr.google.com/scene-viewer/1.0?${params.toString()}` +
+    `#Intent;scheme=https;package=com.google.android.googlequicksearchbox;` +
+    `action=android.intent.action.VIEW;` +
+    `S.browser_fallback_url=${encodeURIComponent(modelUrl)};end;`;
+  window.location.href = intentUrl;
+}
+
+/**
+ * Launch AR on iOS via model-viewer Quick Look (auto-generates USDZ from GLB).
+ * Lazily loads model-viewer, creates a temporary element, and activates AR.
+ */
+async function launchIOSAR(modelUrl) {
+  await import("@google/model-viewer");
+  const mv = document.createElement("model-viewer");
+  mv.setAttribute("src", modelUrl);
+  mv.setAttribute("ar", "");
+  mv.setAttribute("ar-modes", "quick-look");
+  mv.setAttribute("ar-scale", "auto");
+  mv.style.cssText = "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;";
+  document.body.appendChild(mv);
+  // Wait for model-viewer to initialise and check AR support
+  await new Promise((r) => setTimeout(r, 500));
+  if (mv.canActivateAR) mv.activateAR();
+  // Clean up after user returns from AR
+  setTimeout(() => mv.remove(), 10000);
+}
+
 export default function ARButton({ product }) {
-  const [status, setStatus] = useState("checking"); // checking | available | unavailable | launching
-  const mvRef = useRef(null);
+  const [launching, setLaunching] = useState(false);
   const arSupport = getARSupport(product);
 
-  useEffect(() => {
-    if (!arSupport.supported) {
-      setStatus("unavailable");
-      return;
-    }
-    ensureModelViewer()
-      .then(() => setStatus("available"))
-      .catch(() => setStatus("unavailable"));
-  }, [arSupport.supported]);
-
   const handleLaunch = useCallback(() => {
-    if (status !== "available") return;
-    setStatus("launching");
+    if (launching) return;
+    const modelUrl = getAbsoluteModelURL(product.modelPath);
 
-    const mv = mvRef.current;
-    if (mv && mv.canActivateAR) {
-      mv.activateAR();
+    if (arSupport.platform === "android") {
+      launchAndroidAR(modelUrl, product.name);
+    } else if (arSupport.platform === "ios") {
+      setLaunching(true);
+      launchIOSAR(modelUrl)
+        .catch(() => {})
+        .finally(() => setLaunching(false));
     }
-    // Reset after a delay (user returns from AR)
-    setTimeout(() => setStatus("available"), 3000);
-  }, [status]);
+  }, [launching, arSupport.platform, product]);
 
   // Desktop or STL product — don't render
   if (!arSupport.supported) return null;
 
-  // Mobile with GLB — functional AR button (Android: Scene Viewer, iOS: Quick Look)
   return (
-    <>
-      <button
-        type="button"
-        onClick={handleLaunch}
-        disabled={status === "launching" || status === "checking"}
-        className="hover:text-accent transition-colors p-2 cursor-pointer"
-        style={{ color: status === "launching" ? "var(--color-accent)" : "#333" }}
-        title="View in your room (AR)"
-      >
-        {status === "launching" ? (
-          <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-            <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="8" />
-          </svg>
-        ) : (
-          <ARIcon className="w-5 h-5" />
-        )}
-      </button>
-
-      {/* Hidden model-viewer for AR activation only */}
-      <div style={{ position: "absolute", width: 0, height: 0, overflow: "hidden", pointerEvents: "none" }}>
-        <model-viewer
-          ref={mvRef}
-          src={getAbsoluteModelURL(product.modelPath)}
-          ios-src={product.usdzPath || undefined}
-          ar
-          ar-modes="scene-viewer webxr quick-look"
-          ar-scale="auto"
-          style={{ width: "1px", height: "1px" }}
-        />
-      </div>
-    </>
+    <button
+      type="button"
+      onClick={handleLaunch}
+      disabled={launching}
+      className="hover:text-accent transition-colors p-2 cursor-pointer"
+      style={{ color: launching ? "var(--color-accent)" : "#333" }}
+      title="View in your room (AR)"
+    >
+      {launching ? (
+        <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="8" />
+        </svg>
+      ) : (
+        <ARIcon className="w-5 h-5" />
+      )}
+    </button>
   );
 }
