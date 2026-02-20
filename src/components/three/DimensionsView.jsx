@@ -130,10 +130,13 @@ export default function DimensionsView({ productBBox, productDimensions, heightS
     const iphoneTallSize = [iphoneBBoxSize.x, iphoneBBoxSize.y, iphoneBBoxSize.z][iphoneTallAxisIndex];
     const scaledIphoneTallDim = iphoneTallSize * iphoneScaleFactor;
 
-    // Layout constants proportional to product height
-    const tickLen = Math.max(0.04, pSize.y * 0.03);
-    const lineOffset = Math.max(0.15, pSize.y * 0.08);
-    const labelOffset = Math.max(0.25, pSize.y * 0.14);
+    // Layout constants proportional to product size (no hardcoded minimums —
+    // GLBs are now in meters so bbox values are small; comparisonScale handles
+    // scaling everything to fit the viewport)
+    const maxPDim = Math.max(pSize.x, pSize.y, pSize.z);
+    const tickLen = maxPDim * 0.03;
+    const lineOffset = maxPDim * 0.08;
+    const labelOffset = maxPDim * 0.14;
 
     // Edges from ACTUAL bbox
     const left   = center.x - pSize.x / 2;
@@ -343,7 +346,7 @@ export default function DimensionsView({ productBBox, productDimensions, heightS
             lineWidth={1.5}
           />
           <Html
-            position={[right + lineOffset, center.y, front + 0.05]}
+            position={[right + lineOffset, center.y, front + tickLen]}
             center
             style={{ pointerEvents: "none" }}
           >

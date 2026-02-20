@@ -18,6 +18,18 @@ export default function ProductViewerModal({ product, onClose }) {
   // Dimensions view toggle
   const [showDimensions, setShowDimensions] = useState(false);
   const controlsRef = useRef();
+  // Measure color picker height to position dimensions button above it
+  const colorPickerRef = useRef();
+  const [colorPickerHeight, setColorPickerHeight] = useState(0);
+  useEffect(() => {
+    const el = colorPickerRef.current;
+    if (!el) { setColorPickerHeight(0); return; }
+    const ro = new ResizeObserver(([entry]) => {
+      setColorPickerHeight(entry.contentRect.height);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [product, zones]);
 
   // Reset camera to front-on when entering dimensions mode
   useEffect(() => {
@@ -169,7 +181,7 @@ export default function ProductViewerModal({ product, onClose }) {
 
         {/* Color picker — zone-based for GLB, single-color for STL */}
         {allColors.length > 0 && (
-          <div className="absolute bottom-12 inset-x-0 z-10 px-4" style={{ pointerEvents: "none" }}>
+          <div ref={colorPickerRef} className="absolute bottom-12 inset-x-0 z-10 px-4" style={{ pointerEvents: "none" }}>
             {isGLB && zones.length > 1 ? (
               /* Zone-based picker for multi-color GLB models */
               <div style={{ pointerEvents: "auto" }} className="flex flex-col items-center gap-2">
@@ -300,7 +312,7 @@ export default function ProductViewerModal({ product, onClose }) {
             onClick={() => setShowDimensions((prev) => !prev)}
             className="absolute z-10 left-4 cursor-pointer flex items-center gap-2 px-4 py-2 rounded-full transition-all"
             style={{
-              bottom: allColors.length > 0 ? 100 : 52,
+              bottom: allColors.length > 0 ? 48 + colorPickerHeight + 8 : 52,
               background: showDimensions ? "var(--color-accent)" : "rgba(255,255,255,0.9)",
               color: showDimensions ? "#fff" : "#333",
               border: showDimensions ? "2px solid var(--color-accent)" : "2px solid rgba(0,0,0,0.15)",

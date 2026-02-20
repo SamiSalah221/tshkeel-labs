@@ -451,30 +451,37 @@ function GLBModel({ path, scale, rotation, zoneColors, onZonesDetected, zoneConf
     });
   });
 
+  // Object-local bounding box — computed when coloredScene is a fresh clone
+  // (before R3F attaches it to a parent group). This avoids the parent
+  // group's normalizedScale from inflating the bbox values.
+  const localBBox = useMemo(() => {
+    if (!coloredScene) return null;
+    coloredScene.updateWorldMatrix(true, true);
+    return new THREE.Box3().setFromObject(coloredScene);
+  }, [coloredScene]);
+
   // Detect Z-up models and compute correction for dimensions view.
   // Only handles Z-up → Y-up conversion (-PI/2 on X). Models with modelRotation
   // (like Kaaba) use their rotation directly in the JSX render path instead.
   const dimensionsCorrection = useMemo(() => {
-    if (!showDimensions || !dimensions) return null;
-    coloredScene.updateWorldMatrix(true, true);
-    const rawBox = new THREE.Box3().setFromObject(coloredScene);
+    if (!showDimensions || !dimensions || !localBBox) return null;
     const rawSize = new THREE.Vector3();
-    rawBox.getSize(rawSize);
+    localBBox.getSize(rawSize);
     if (!detectZUp(rawSize, dimensions)) return null;
     const rawCenter = new THREE.Vector3();
-    rawBox.getCenter(rawCenter);
+    localBBox.getCenter(rawCenter);
     return {
       centerOffset: [-rawCenter.x, -rawCenter.y, -rawCenter.z],
       rotation: [-Math.PI / 2, 0, 0],
     };
-  }, [showDimensions, dimensions, coloredScene]);
+  }, [showDimensions, dimensions, localBBox]);
 
   // Compute product bounding box for dimensions overlay
   const productBBox = useMemo(() => {
-    if (!showDimensions || !dimensions || !coloredScene) return null;
-    coloredScene.updateWorldMatrix(true, true);
+    if (!showDimensions || !dimensions || !coloredScene || !localBBox) return null;
     if (dimensionsCorrection) {
-      // Simulate the centering + rotation to compute the AABB
+      // Simulate the centering + rotation to compute the AABB.
+      // Clone is parentless — no parent scale pollution.
       const tempGroup = new THREE.Group();
       const sceneClone = coloredScene.clone();
       const innerGroup = new THREE.Group();
@@ -488,20 +495,18 @@ function GLBModel({ path, scale, rotation, zoneColors, onZonesDetected, zoneConf
       innerGroup.remove(sceneClone);
       return rotatedBox;
     }
-    return new THREE.Box3().setFromObject(coloredScene);
-  }, [showDimensions, dimensions, coloredScene, dimensionsCorrection]);
+    return localBBox.clone();
+  }, [showDimensions, dimensions, coloredScene, dimensionsCorrection, localBBox]);
 
   // Auto-normalize: GLBs are now in real-world meters (tiny values).
   // Normalize to ~1 unit max dimension, then apply product.scale as a multiplier.
   const normalizedScale = useMemo(() => {
-    if (!coloredScene) return scale;
-    coloredScene.updateWorldMatrix(true, true);
-    const box = new THREE.Box3().setFromObject(coloredScene);
+    if (!localBBox) return scale;
     const size = new THREE.Vector3();
-    box.getSize(size);
+    localBBox.getSize(size);
     const maxDim = Math.max(size.x, size.y, size.z);
     return maxDim > 0 ? scale / maxDim : scale;
-  }, [coloredScene, scale]);
+  }, [localBBox, scale]);
 
   // When dimensions are shown, scale the entire group so product + iPhone
   // at correct proportional sizes fits within the camera viewport
