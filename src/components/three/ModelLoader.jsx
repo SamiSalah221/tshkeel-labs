@@ -491,10 +491,22 @@ function GLBModel({ path, scale, rotation, zoneColors, onZonesDetected, zoneConf
     return new THREE.Box3().setFromObject(coloredScene);
   }, [showDimensions, dimensions, coloredScene, dimensionsCorrection]);
 
+  // Auto-normalize: GLBs are now in real-world meters (tiny values).
+  // Normalize to ~1 unit max dimension, then apply product.scale as a multiplier.
+  const normalizedScale = useMemo(() => {
+    if (!coloredScene) return scale;
+    coloredScene.updateWorldMatrix(true, true);
+    const box = new THREE.Box3().setFromObject(coloredScene);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const maxDim = Math.max(size.x, size.y, size.z);
+    return maxDim > 0 ? scale / maxDim : scale;
+  }, [coloredScene, scale]);
+
   // When dimensions are shown, scale the entire group so product + iPhone
   // at correct proportional sizes fits within the camera viewport
   const comparisonScale = useMemo(() => {
-    if (!showDimensions || !dimensions || !productBBox) return scale;
+    if (!showDimensions || !dimensions || !productBBox) return normalizedScale;
     const pSize = new THREE.Vector3();
     productBBox.getSize(pSize);
     const sceneMaxDim = Math.max(pSize.x, pSize.y, pSize.z);
@@ -511,11 +523,11 @@ function GLBModel({ path, scale, rotation, zoneColors, onZonesDetected, zoneConf
     const totalExtent = Math.max(totalWidth, totalHeight);
 
     const fitTarget = 3.0;
-    return totalExtent > 0 ? fitTarget / totalExtent : scale;
-  }, [showDimensions, dimensions, productBBox, scale]);
+    return totalExtent > 0 ? fitTarget / totalExtent : normalizedScale;
+  }, [showDimensions, dimensions, productBBox, normalizedScale]);
 
   return (
-    <group scale={showDimensions && productBBox ? comparisonScale : scale}>
+    <group scale={showDimensions && productBBox ? comparisonScale : normalizedScale}>
       {dimensionsCorrection ? (
         <group rotation={dimensionsCorrection.rotation}>
           <group position={dimensionsCorrection.centerOffset}>
