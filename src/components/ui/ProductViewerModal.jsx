@@ -108,20 +108,6 @@ export default function ProductViewerModal({ product, onClose }) {
                 </svg>
               )}
             </button>
-            {/* Dimensions toggle */}
-            {product.dimensions && (
-              <button
-                type="button"
-                onClick={() => setShowDimensions((prev) => !prev)}
-                className="hover:text-accent transition-colors p-2 cursor-pointer"
-                style={{ color: showDimensions ? "var(--color-accent)" : "#333" }}
-                title={showDimensions ? "Hide dimensions" : "View dimensions"}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M3 21V3m0 18l4-4m-4-3l4-4m-4-3l4-4M21 3H3m18 0v18m0-18l-4 4m4 3l-4 4m4 3l-4 4" />
-                </svg>
-              </button>
-            )}
             {/* AR button */}
             <ARButton product={product} />
             {/* Close button */}
@@ -300,6 +286,29 @@ export default function ProductViewerModal({ product, onClose }) {
               </div>
             )}
           </div>
+        )}
+
+        {/* Dimensions button — floating pill */}
+        {product.dimensions && (
+          <button
+            type="button"
+            onClick={() => setShowDimensions((prev) => !prev)}
+            className="absolute z-10 left-4 cursor-pointer flex items-center gap-2 px-4 py-2 rounded-full transition-all"
+            style={{
+              bottom: allColors.length > 0 ? 100 : 52,
+              background: showDimensions ? "var(--color-accent)" : "rgba(255,255,255,0.9)",
+              color: showDimensions ? "#fff" : "#333",
+              border: showDimensions ? "2px solid var(--color-accent)" : "2px solid rgba(0,0,0,0.15)",
+              boxShadow: showDimensions ? "0 2px 12px rgba(201,168,76,0.4)" : "0 2px 8px rgba(0,0,0,0.15)",
+              fontSize: 13,
+              fontWeight: 600,
+            }}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M3 21V3m0 18l4-4m-4-3l4-4m-4-3l4-4M21 3H3m18 0v18m0-18l-4 4m4 3l-4 4m4 3l-4 4" />
+            </svg>
+            {showDimensions ? "Hide Dimensions" : "View Dimensions"}
+          </button>
         )}
 
         {/* Footer instructions */}

@@ -64,19 +64,22 @@ export default function ARButton({ product }) {
         .catch(() => {})
         .finally(() => setLaunching(false));
     }
+    // Desktop: no-op (button shows but AR not available)
   }, [launching, arSupport.platform, product]);
 
-  // Desktop or STL product — don't render
+  // No GLB model or STL — don't render
   if (!arSupport.supported) return null;
+
+  const isDesktop = arSupport.platform === "desktop";
 
   return (
     <button
       type="button"
       onClick={handleLaunch}
-      disabled={launching}
+      disabled={launching || isDesktop}
       className="hover:text-accent transition-colors p-2 cursor-pointer"
-      style={{ color: launching ? "var(--color-accent)" : "#333" }}
-      title="View in your room (AR)"
+      style={{ color: launching ? "var(--color-accent)" : isDesktop ? "#aaa" : "#333", cursor: isDesktop ? "default" : "pointer" }}
+      title={isDesktop ? "AR — available on mobile devices" : "View in your room (AR)"}
     >
       {launching ? (
         <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>

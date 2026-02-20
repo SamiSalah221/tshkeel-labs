@@ -16,7 +16,8 @@ export function getARSupport(product) {
   if (IS_IOS) {
     return { supported: true, platform: "ios" };
   }
-  return { supported: false, reason: "desktop" };
+  // Desktop: button renders but AR launch is unavailable
+  return { supported: true, platform: "desktop" };
 }
 
 /**
