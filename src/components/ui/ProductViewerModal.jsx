@@ -87,6 +87,11 @@ export default function ProductViewerModal({ product, onClose }) {
                 {product.viewerNote}
               </p>
             )}
+            {product.dimensions && (
+              <p className="text-xs mt-1" style={{ color: "#888" }}>
+                {product.dimensions.w} &times; {product.dimensions.h} &times; {product.dimensions.d} mm
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-1">
             {/* Rotation toggle */}

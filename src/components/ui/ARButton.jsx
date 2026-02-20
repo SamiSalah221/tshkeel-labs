@@ -19,6 +19,7 @@ function launchAndroidAR(modelUrl, productName) {
     file: modelUrl,
     mode: "ar_preferred",
     title: productName,
+    resizable: "false",
   });
   const intentUrl =
     `intent://arvr.google.com/scene-viewer/1.0?${params.toString()}` +
@@ -38,7 +39,7 @@ async function launchIOSAR(modelUrl) {
   mv.setAttribute("src", modelUrl);
   mv.setAttribute("ar", "");
   mv.setAttribute("ar-modes", "quick-look");
-  mv.setAttribute("ar-scale", "auto");
+  mv.setAttribute("ar-scale", "fixed");
   mv.style.cssText = "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;";
   document.body.appendChild(mv);
   // Wait for model-viewer to initialise and check AR support
