@@ -13,3 +13,5 @@ export const IS_TOUCH =
 export const IS_MOBILE =
   typeof window !== "undefined" &&
   window.matchMedia("(max-width: 768px)").matches;
+
+export const IS_ANDROID = /Android/i.test(ua);

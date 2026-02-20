@@ -263,6 +263,7 @@ export const islamicProducts = [
       { name: "White", rgb: [85, 90, 95], editable: true },
     ],
     image: `${B}images/products/islamic/ramadan stand.png`,
+    viewerNote: "This product is single-sided only (not double-sided).",
   },
   {
     id: 43,

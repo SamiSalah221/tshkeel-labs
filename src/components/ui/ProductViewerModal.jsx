@@ -3,6 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment } from "@react-three/drei";
 import { ThemeContext } from "../../contexts/ThemeContext";
 import ModelLoader from "../three/ModelLoader";
+import ARButton from "./ARButton";
 
 export default function ProductViewerModal({ product, onClose }) {
   const { theme } = useContext(ThemeContext);
@@ -81,6 +82,11 @@ export default function ProductViewerModal({ product, onClose }) {
             <p className="text-sm" style={{ color: "#555" }}>
               {product.currency}{product.price}
             </p>
+            {product.viewerNote && (
+              <p className="text-xs mt-1" style={{ color: "#888", fontStyle: "italic" }}>
+                {product.viewerNote}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-1">
             {/* Rotation toggle */}
@@ -116,6 +122,8 @@ export default function ProductViewerModal({ product, onClose }) {
                 </svg>
               </button>
             )}
+            {/* AR button */}
+            <ARButton product={product} />
             {/* Close button */}
             <button
               type="button"
