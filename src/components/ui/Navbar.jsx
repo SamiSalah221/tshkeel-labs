@@ -54,7 +54,7 @@ export default function Navbar() {
               type="button"
               onClick={() => handleNavClick("hero")}
               className="text-accent font-bold text-xl tracking-wide cursor-pointer"
-              style={{ fontFamily: "'Saltza', 'Inter', system-ui, sans-serif", letterSpacing: "0.05em" }}
+              style={{ fontFamily: "'Yulltan', 'Inter', system-ui, sans-serif", letterSpacing: "0.05em" }}
             >
               {siteConfig.businessName}
             </button>

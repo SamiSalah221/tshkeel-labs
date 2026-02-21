@@ -5,7 +5,7 @@ const STEPS = [
   {
     number: "1",
     title: "Choose Your Piece",
-    description: "Browse our collection or tell us your custom idea.",
+    description: "Browse our collection or tell us your custom idea. View each piece in 3D, customize colors, check real dimensions with an iPhone for reference, and even see it in Augmented Reality.",
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />

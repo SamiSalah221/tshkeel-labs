@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: 'Saltza';
-  src: url('/fonts/Saltza.ttf') format('truetype');
+  font-family: 'Yulltan';
+  src: url('/fonts/yulltanregular-nrwer.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -58,7 +58,7 @@ body,
 }
 
 h1, h2, h3 {
-  font-family: 'Saltza', 'Inter', system-ui, sans-serif;
+  font-family: 'Yulltan', 'Inter', system-ui, sans-serif;
   letter-spacing: 0.05em;
 }
 
